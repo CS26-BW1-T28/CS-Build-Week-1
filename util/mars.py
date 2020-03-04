@@ -1,5 +1,5 @@
-import random
 import json
+import random
 
 
 class Chamber:
@@ -144,14 +144,14 @@ class Mars:
             previous_chamber = chamber
 
 
-total_chambers = 100
-grid_size = 100
-length_of_each_level = 25
-number_of_levels = 4
+total_chambers = 500
+grid_size = 150
+length_of_each_level = 100
+number_of_levels = 5
 multiplier_of_the_level = 0
 chamber_listings = {
     0: ['Martian Surface', 'The ruddy rocky dusty terrain behind you. The entrance ahead of you, leading downwards.']}
-chamber_levels = ['Dirt', 'Concrete', 'Metal', 'Rock']
+chamber_levels = ['Dirt', 'Concrete', 'Metal', 'Rock', 'Crystal']
 for level in chamber_levels:
     for i in range(1, length_of_each_level + 1):
         chamber_listings[i + multiplier_of_the_level] = [f'Chamber {i + multiplier_of_the_level}: {level}',
@@ -162,15 +162,18 @@ chamber_listings[total_chambers + 1] = ['Martian Lair',
 m = Mars()
 m.build_chambers(level=length_of_each_level, size_x=grid_size, size_y=grid_size, listings=chamber_listings)
 json_list = []
+map = open('generated_map.txt', 'w')
 for i in range(0, grid_size):
+    row_data = ''
     for j in range(0, grid_size):
         val = m.grid[i][j]
         if val is not None:
             json_list.append(val.convert_to_dict())
-            print(val, end='')
+            row_data += repr(val)
         else:
-            print('-----', end='')
-    print()
+            row_data += '-----'
+    map.write(row_data + '\n')
+map.close()
 json_list_encoded = json.dumps(json_list, indent=4, sort_keys=True)
 with open('../fixtures/all_chambers.json', 'w') as f:
     json.dump(json_list, f)
