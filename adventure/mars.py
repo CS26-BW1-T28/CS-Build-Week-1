@@ -142,9 +142,9 @@ class Mars:
             map_data.write(row_to_write + '\n')
         map_data.close()
         # Save the list of dictionary-converted chambers as a .json file
-        with open('./all_chambers.json', 'w') as f:
-            # json.dump(json_list, f)
-            return JsonResponse(json_list)
+        with open('../fixtures/all_chambers.json', 'w') as f:
+            json.dump(json_list, f)
+            # return JsonResponse(json_list)
     
 
 total_chambers = 500
@@ -164,6 +164,5 @@ chamber_listings[total_chambers + 1] = ['Martian Lair',
                                         'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
 mars = Mars()
 mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
-# mars.jsonify(size_of_grid)
-# JsonResponse(size_of_grid)
-    
+mars.jsonify(size_of_grid)
+    #outputs to a file to be grabbed

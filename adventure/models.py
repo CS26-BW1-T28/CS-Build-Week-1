@@ -18,8 +18,8 @@ class Chamber(models.Model):
     w_to = models.IntegerField(default=0, null=True, blank=True)
     u_to = models.IntegerField(default=0, null=True, blank=True)
     d_to = models.IntegerField(default=0, null=True, blank=True)
-    # x = models.IntegerField(default=0, null=True, blank=True)
-    # y = models.IntegerField(default=0, null=True, blank=True)
+    x = models.IntegerField(default=0, null=True, blank=True)
+    y = models.IntegerField(default=0, null=True, blank=True)
     
     def connect_chambers(self, destinationChamber, direction):
         destinationChamberID = destinationChamber.id
