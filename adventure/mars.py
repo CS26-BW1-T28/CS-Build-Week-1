@@ -8,7 +8,7 @@ import json
 import uuid
 from .models import *
 
-
+# This is the 'room' generator (creates the map)
 class Mars:
     """Class which represents the underground labyrinthine world below the Martian environment"""
 
@@ -165,4 +165,4 @@ chamber_listings[total_chambers + 1] = ['Martian Lair',
 mars = Mars()
 mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
 mars.jsonify(size_of_grid)
-    #outputs to a file to be grabbed
+#outputs to a file to be grabbed
