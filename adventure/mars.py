@@ -191,7 +191,7 @@ class Mars:
         # with open('all_chambers2.json', 'w') as f:
             # json.dump(json_list, f)
             # return JsonResponse(json_list, f)            
-        f = open('all_chambers2.json', "w+")
+        f = open('all_chambers.json', "w+")
         f.write(str(json_list))
         f.close()
     
