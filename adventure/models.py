@@ -99,14 +99,7 @@ class Player(models.Model):
 
 
 class PlayerVisited(models.Model):
-    player = models.ForeignKey(
-        'Player',
-        on_delete=models.CASCADE
-    )
-    chamber = models.ForeignKey(
-        'Chamber',
-        on_delete=models.CASCADE
-    )
+    pass
 
 
 class Mars(models.Model):
@@ -261,6 +254,4 @@ def create_user_player(sender, instance, created, **kwargs):
 def save_user_player(sender, instance, **kwargs):
     instance.player.save()
 
-
-# release: python manage.py migrate && python manage.py loaddata adventure/all_chambers.json
 
