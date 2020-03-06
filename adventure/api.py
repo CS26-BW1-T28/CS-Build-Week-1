@@ -11,16 +11,6 @@ from rest_framework import serializers, viewsets
 from django.conf import settings
 
 
-class ChamberSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Chamber
-        fields = ('id', 'title', 'description', 'n_to', 's_to', 'e_to', 'w_to', 'u_to', 'd_to')
-
-class ChamberViewSet(viewsets.ModelViewSet):
-    queryset = Chamber.objects.all()
-    serializer_class = ChamberSerializer
-
-
 @csrf_exempt
 @api_view(["GET"])
 def initialize(request):
@@ -30,7 +20,25 @@ def initialize(request):
     uuid = player.uuid
     chamber = player.chamber()
     players = chamber.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name':player.user.username, 'chamber':chamber.title, 'description':chamber.description, 'players':players}, safe=True)
+    chamber_names = Chamber.objects.filter(chamber=chamber.title)
+    mars_map = {
+        "chamber": chamber.title,
+        "chambers": [{
+            'id': i.id,
+            'x': i.x,
+            'y': i.y,
+            'n_to': i.n_to,
+            's_to': i.s_to,
+            'e_to': i.e_to,
+            'w_to': i.w_to,
+        } for i in chamber_names]
+    }
+
+    chambers_visited = PlayerVisited.objects.filter(player=player)
+    visited_list = [i.chamber.id for i in chambers_visited]
+    players = chamber.playerNames(player_id) 
+
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': room.title, 'description': room.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
 
 @csrf_exempt
 @api_view(['GET'])
@@ -40,12 +48,6 @@ def chambers(request):
         allChambers.append({'id':chamber.id, 'title':chamber.title, 'description':chamber.description, 'n_to': chamber.n_to, 's_to': chamber.s_to, 'e_to': chamber.e_to, 'w_to': chamber.w_to, 'u_to':chamber.u_to, 'd_to':chamber.d_to}) 
 
     return JsonResponse(allChambers, safe=False, status=200)
-
-@csrf_exempt
-@api_view(['GET'])
-def mars(request):
-    Mars = mars
-    return JsonResponse(Mars, safe=False)
 
 # @csrf_exempt
 @api_view(["POST"])
@@ -89,8 +91,3 @@ def say(request):
     # IMPLEMENT
     return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
 
-# @api_view(['GET'])
-# def generate_map(request):
-#     generate = Generator()
-#     generate.create_map()
-#     return JsonResponse({'created'}, safe=False, status=201)

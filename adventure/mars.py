@@ -5,10 +5,11 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import random
 import json
+from .fixtures import *
 import uuid
 from .models import *
 
-
+# This is the room generator 
 class Mars:
     """Class which represents the underground labyrinthine world below the Martian environment"""
 
@@ -46,10 +47,10 @@ class Mars:
         level_multiplier = 1
         forbidden_directions = 's'
         previous_chamber = None
+        
         # Each time this loop is run, another chamber is created and added to the grid
         for chamber_counter in range(len(listings)):
             chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
-            chamber.save()
             self.grid[y][x] = chamber
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
@@ -132,7 +133,7 @@ class Mars:
         json_list = []
         for y in range(0, grid_size):
             row_to_write = ''
-            for x in range(0, grid_size):
+            for x in range(0, grid_size ):
                 chamber = self.grid[y][x]
                 if chamber is not None:
                     json_list.append(chamber.convert_to_dict())
@@ -142,9 +143,12 @@ class Mars:
             map_data.write(row_to_write + '\n')
         map_data.close()
         # Save the list of dictionary-converted chambers as a .json file
-        with open('../fixtures/all_chambers.json', 'w') as f:
-            json.dump(json_list, f)
-            # return JsonResponse(json_list)
+        # with open('all_chambers2.json', 'w') as f:
+            # json.dump(json_list, f)
+            # return JsonResponse(json_list, f)            
+        f = open('all_chambers2.json', "w+")
+        f.write(str(json_list))
+        f.close()
     
 
 total_chambers = 500
@@ -152,17 +156,25 @@ size_of_grid = 150
 length_of_each_level = 100
 number_of_levels = 5
 multiplier_of_the_level = 0
+
 chamber_listings = {
-    0: ['Martian Surface', 'The ruddy rocky dusty terrain behind you. The entrance ahead of you, leading downwards.']}
+    0: ['Martian Surface', 'The ruddy rocky dusty terrain behind you. The entrance ahead of you, leading downwards.']
+}
+
 chamber_levels = ['Dirt', 'Concrete', 'Metal', 'Rock', 'Crystal']
+
 for level in chamber_levels:
     for i in range(1, length_of_each_level + 1):
-        chamber_listings[i + multiplier_of_the_level] = [f'Chamber {i + multiplier_of_the_level}: {level}',
-                                                         f'You are in a {level} chamber.']
+        chamber_listings[i + multiplier_of_the_level] = [f'Chamber {i + multiplier_of_the_level}: {level}', f'You are in a {level} chamber.']
     multiplier_of_the_level += length_of_each_level
-chamber_listings[total_chambers + 1] = ['Martian Lair',
-                                        'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
+
+chamber_listings[total_chambers + 1] = ['Martian Lair', 'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
+
 mars = Mars()
+
 mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
-mars.jsonify(size_of_grid)
-    #outputs to a file to be grabbed
+
+# mars.jsonify(chamber_listings)
+
+print(
+    f"\nMARS\n number_of_levels:{number_of_levels},\n total_chambers: {total_chambers}\n")
