@@ -20,7 +20,7 @@ def initialize(request):
     uuid = player.uuid
     chamber = player.chamber()
     players = chamber.playerNames(player_id)
-    chamber_names = Room.objects.filter(chamber=chamber.title)
+    chamber_names = Chamber.objects.filter(chamber=chamber.title)
     mars_map = {
         "chamber": chamber.title,
         "chambers": [{
