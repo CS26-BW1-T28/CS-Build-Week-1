@@ -50,7 +50,6 @@ class Mars:
         # Each time this loop is run, another chamber is created and added to the grid
         for chamber_counter in range(len(listings)):
             chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
-            chamber.save()
             self.grid[y][x] = chamber
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
