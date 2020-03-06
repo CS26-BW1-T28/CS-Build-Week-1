@@ -83,7 +83,7 @@ class Mars:
         # Each time this loop is run, another chamber is created and added to the grid
         for chamber_counter in range(len(listings)):
             chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
-            self.grid[y][x] = chamber
+            self.grid[y][x] = chamber.id
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
                 if descend_level:
@@ -166,7 +166,8 @@ class Mars:
         for y in range(0, grid_size):
             row_to_write = ''
             for x in range(0, grid_size):
-                chamber = self.grid[y][x]
+                chamber_id = self.grid[y][x]
+                # TODO: Need to get chamber from chamber_id
                 if chamber is not None:
                     json_list.append(chamber.convert_to_dict())
                     row_to_write += repr(chamber)
