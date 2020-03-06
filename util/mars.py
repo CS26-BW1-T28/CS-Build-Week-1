@@ -51,6 +51,7 @@ class Mars:
         self.width = 0
         self.height = 0
         self.grid = None
+        self.grid_ids = None
 
     def build_chambers(self, level, size_x, size_y, listings):
         """Method which randomly generates the Martian labyrinthine underground populated with chambers"""
@@ -75,6 +76,7 @@ class Mars:
         x: int = 1
         y: int = 1
         # The following variables are to help the random generator produce something acceptable
+        self.grid_ids = self.grid
         chamber_direction = 'd'
         descend_level = True
         level_multiplier = 1
@@ -83,7 +85,8 @@ class Mars:
         # Each time this loop is run, another chamber is created and added to the grid
         for chamber_counter in range(len(listings)):
             chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
-            self.grid[y][x] = chamber.id
+            self.grid[y][x] = chamber
+            self.grid_ids[y][x] = chamber.id
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
                 if descend_level:
@@ -166,8 +169,7 @@ class Mars:
         for y in range(0, grid_size):
             row_to_write = ''
             for x in range(0, grid_size):
-                chamber_id = self.grid[y][x]
-                # TODO: Need to get chamber from chamber_id
+                chamber = self.grid[y][x]
                 if chamber is not None:
                     json_list.append(chamber.convert_to_dict())
                     row_to_write += repr(chamber)
@@ -196,5 +198,6 @@ for level in chamber_levels:
 chamber_listings[total_chambers + 1] = ['Martian Lair',
                                         'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
 mars = Mars()
-mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
+mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid,
+                    listings=chamber_listings)
 mars.jsonify(size_of_grid)
