@@ -21,7 +21,7 @@ class Chamber:
 
     def __repr__(self):
         """Show the id of this chamber formatted with leading zeros"""
-        return f"({self.id:003})"
+        return f"<{self.id:003}>"
 
     def convert_to_dict(self):
         """Returns a dictionary representation of this class including metadata such as the module and class names"""
@@ -173,7 +173,7 @@ class Mars:
     def jsonify(self, grid_size):
         """Method to print an ASCII map to file and all of the chambers to a JSON file"""
         # Get each chamber from the grid coordinates and write the attributes to file
-        map_data = open('generated_map.txt', 'w')
+        map_data = open('generated_map.txt', 'w', encoding="utf-8")
         json_list = []
         for y in range(0, grid_size):
             row_to_write = ''
@@ -183,7 +183,7 @@ class Mars:
                     json_list.append(chamber.convert_to_dict())
                     row_to_write += repr(chamber)
                 else:
-                    row_to_write += '-----'
+                    row_to_write += '▌░░░▐'
             map_data.write(row_to_write + '\n')
         map_data.close()
         # Save the list of dictionary-converted chambers as a .json file
