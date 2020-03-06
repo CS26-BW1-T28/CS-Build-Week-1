@@ -91,8 +91,3 @@ def say(request):
     # IMPLEMENT
     return JsonResponse({'error':"Not yet implemented"}, safe=True, status=500)
 
-# @api_view(['GET'])
-# def generate_map(request):
-#     generate = Generator()
-#     generate.create_map()
-#     return JsonResponse({'created'}, safe=False, status=201)
