@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 ]
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 SITE_ID = 1
 
 MIDDLEWARE = [
@@ -90,7 +91,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'adv_project.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases

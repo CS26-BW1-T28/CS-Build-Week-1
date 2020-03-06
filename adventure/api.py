@@ -3,8 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
-from .models import *
-from .mars import *
+from .models import Player, Chamber, Mars
 from rest_framework.decorators import api_view
 import json
 from rest_framework import serializers, viewsets
@@ -31,8 +30,8 @@ def initialize(request):
             's_to': i.s_to,
             'e_to': i.e_to,
             'w_to': i.w_to,
-            'u_to': i.e_to,
-            'd_to': i.w_to,
+            'u_to': i.u_to,
+            'd_to': i.d_to,
         } for i in chambers]
     }
 
@@ -45,11 +44,37 @@ def initialize(request):
 @csrf_exempt
 @api_view(['GET'])
 def chambers(request):
-    allChambers = []
-    for chamber in Chamber.objects.all():
-        allChambers.append({'id':chamber.id, 'title':chamber.title, 'description':chamber.description, 'n_to': chamber.n_to, 's_to': chamber.s_to, 'e_to': chamber.e_to, 'w_to': chamber.w_to, 'u_to':chamber.u_to, 'd_to':chamber.d_to}) 
+    # allChambers = []
+    # for chamber in Chamber.objects.all():
+    #     allChambers.append(chamber) 
 
-    return JsonResponse(allChambers, safe=False, status=200)
+    return JsonResponse(all_chambers.json, safe=False, status=200)
+
+
+@api_view(["GET"])
+def mars_map(request):
+    try:
+        chambers = Chamber.objects.all()
+        new_map = {
+            "chamber": chamber.title,
+            "chambers": [{
+                'id': i.id,
+                'x': i.x,
+                'y': i.y,
+                'n_to': i.n_to,
+                's_to': i.s_to,
+                'e_to': i.e_to,
+                'w_to': i.w_to,
+                'u_to': i.e_to,
+                'd_to': i.w_to,
+            } for i in chambers]
+        }
+        # new_map.build_chambers(5, 150, 150, ['Martian Lair', 'Deep underground, you have stumbled upon a grisly sight... (to be continued)'])
+        # new_map.jsonify()
+        
+        return JsonResponse({'MAP INFO'}, safe=False, status=201)
+    except:
+        return JsonResponse({"Failed to build map."}, safe=False, status=500)
 
 # @csrf_exempt
 @api_view(["POST"])

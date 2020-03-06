@@ -8,6 +8,7 @@ import json
 import uuid
 
 class Chamber(models.Model):
+    id = models.IntegerField(primary_key=True, default=0)
     title = models.CharField(max_length=50, default="DEFAULT TITLE")
     description = models.CharField(max_length=500, default="DEFAULT DESCRIPTION")
     n_to = models.IntegerField(default=0)
@@ -77,6 +78,7 @@ class Player(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
 
     def initialize(self):
+        name = 'SpaceGuy'
         if self.currentChamber == 0:
             self.currentChamber = Chamber.objects.first().id
             self.save()
@@ -93,6 +95,7 @@ class Player(models.Model):
             return PlayerVisited.objects.get(player=self, chamber=chamber)
         except PlayerVisited.DoesNotExist:
             return False
+    print(Chamber)
 
 
 class PlayerVisited(models.Model):
@@ -104,6 +107,147 @@ class PlayerVisited(models.Model):
         'Chamber',
         on_delete=models.CASCADE
     )
+
+
+class Mars(models.Model):
+    width = models.IntegerField(default=0)
+    height = models.IntegerField(default=0)
+
+    def build_chambers(self, level, size_x, size_y, listings):
+        self.width = size_x
+        self.height = size_y
+        grid = [None] * size_y
+        for x in range(len(grid)):
+            grid[x] = [None] * size_x
+
+        def is_chamber_present(x_axis, y_axis):
+            """Inner method for checking for the existence of a Chamber at the specified coordinates"""
+            # Prevent index out of range errors
+            if (x_axis >= size_x) or (y_axis >= size_y):
+                return True
+            if grid[y_axis][x_axis] is None:
+                return False
+            else:
+                return True
+
+        # Starting coordinates: (0,0) is the lower left
+        x: int = 1
+        y: int = 1
+        # The following variables are to help the random generator produce something acceptable
+        chamber_direction = 'd'
+        descend_level = True
+        level_multiplier = 1
+        forbidden_directions = 's'
+        previous_chamber = None
+
+        # Each time this loop is run, another chamber is created and added to the grid
+        for chamber_counter in range(len(listings)):
+            chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
+            grid[y][x] = chamber
+            if previous_chamber is not None:
+                previous_chamber.connect_chambers(chamber, chamber_direction)
+                if descend_level:
+                    descend_level = False
+            # This case is for the second chamber which is created, because there was no previous_chamber for the first one
+            elif chamber_direction == 'd':
+                x += 1
+                y += 1
+            # Randomly assign a direction to build a chamber, if it's appropriate to do so
+            invalid_direction = True
+            while invalid_direction and not descend_level:
+                chamber_direction = ['n', 's', 'e', 'w'][random.randint(0, 3)]
+                test_x = 0
+                test_y = 0
+                if chamber_direction == 'n':
+                    test_y = 1
+                if chamber_direction == 's':
+                    test_y = -1
+                if chamber_direction == 'e':
+                    test_x = 1
+                if chamber_direction == 'w':
+                    test_x = -1
+                if 0 <= (y + test_y) < size_y:  # Ensure the chamber stays within the grid
+                    if 0 <= (x + test_x) < size_x:  # Ensure the chamber stays within the grid
+                        if not is_chamber_present(x + test_x, y + test_y):  # Ensure no other chamber is present there
+                            if chamber_direction not in forbidden_directions:  # Ensure chambers are moving in the right direction
+                                invalid_direction = False
+            # Only execute this block when a new level is hit
+            if (chamber_counter > 0) and (chamber_counter % level) == 0:
+                chamber_direction = 'd'
+                descend_level = True
+                level_multiplier += 1
+                if level_multiplier % 5 == 0:
+                    forbidden_directions = 'w'
+                elif level_multiplier % 4 == 0:
+                    forbidden_directions = 'w'
+                elif level_multiplier % 3 == 0:
+                    forbidden_directions = 's'
+                elif level_multiplier % 2 == 0:
+                    forbidden_directions = 'w'
+                else:
+                    forbidden_directions = 's'
+                if not is_chamber_present(x + 1, y + 1):
+                    x += 1
+                    y += 1
+                elif not is_chamber_present(x - 1, y + 1):
+                    x -= 1
+                    y += 1
+                elif not is_chamber_present(x + 1, y - 1):
+                    x += 1
+                    y -= 1
+                elif not is_chamber_present(x - 1, y - 1):
+                    x -= 1
+                    y -= 1
+                else:
+                    x = size_x
+                    y = size_y
+            # Increment the chamber placement so that chambers aren't on top of one another
+            if chamber_direction == 'n':
+                y += 1
+            elif chamber_direction == 's':
+                y -= 1
+            elif chamber_direction == 'e':
+                x += 1
+            elif chamber_direction == 'w':
+                x -= 1
+            # Ensuring the x/y coordinates do not go out of bounds
+            if x >= size_x:
+                x = size_x - 1
+            if y >= size_y:
+                y = size_y - 1
+            # Store the current chamber so it can be connected to the next chamber on the next loop
+            previous_chamber = chamber
+
+        # get grid_obj(self):
+        #     return [c for c in Chamber,objects.all()]
+
+        # get_chamber(self):
+        #     return [c for c in Chamber,objects.filter(id=id)]
+        # grid = json.loads(mars.grid())
+        #   for chamer_id in grid:
+        #       chamber1 = mars.get_chamber(id)[0]
+
+    def jsonify(self, grid_size):
+        map_data = open('generated_map.txt', 'w')
+        json_list = []
+        grid = json.loads(Mars.grid)
+        for y in range(0, grid_size):
+            row_to_write = ''
+            for x in range(0, grid_size):
+                chamber = grid[y][x]
+                if chamber is not None:
+                    json_list.append(chamber.convert_to_dict())
+                    row_to_write += repr(chamber)
+                else:
+                    row_to_write += '-----'
+            map_data.write(row_to_write + '\n')
+        map_data.close()
+
+        # Save the list of dictionary-converted chambers as a .json file
+        return JsonResponse('\all_chambers.json', safe=False, status=200)
+
+        # with open('all_chambers.json', 'w') as f:
+        #     json.dump(json_list, f)
 
 
 @receiver(post_save, sender=User)
