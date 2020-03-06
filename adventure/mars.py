@@ -144,7 +144,6 @@ class Mars:
         # Save the list of dictionary-converted chambers as a .json file
         with open('../fixtures/all_chambers.json', 'w') as f:
             json.dump(json_list, f)
-            # return JsonResponse(json_list)
     
 
 total_chambers = 500
