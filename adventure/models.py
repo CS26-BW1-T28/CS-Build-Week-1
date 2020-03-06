@@ -7,20 +7,17 @@ import random
 import json
 import uuid
 
-
-
 class Chamber(models.Model):
     title = models.CharField(max_length=50, default="DEFAULT TITLE")
     description = models.CharField(max_length=500, default="DEFAULT DESCRIPTION")
-    n_to = models.IntegerField(default=0, null=True, blank=True)
-    s_to = models.IntegerField(default=0, null=True, blank=True)
-    e_to = models.IntegerField(default=0, null=True, blank=True)
-    w_to = models.IntegerField(default=0, null=True, blank=True)
-    u_to = models.IntegerField(default=0, null=True, blank=True)
-    d_to = models.IntegerField(default=0, null=True, blank=True)
-    x = models.IntegerField(default=0, null=True, blank=True)
-    y = models.IntegerField(default=0, null=True, blank=True)
-
+    n_to = models.IntegerField(default=0)
+    s_to = models.IntegerField(default=0)
+    e_to = models.IntegerField(default=0)
+    w_to = models.IntegerField(default=0)
+    u_to = models.IntegerField(default=0)
+    d_to = models.IntegerField(default=0)
+    # x = models.IntegerField(default=0)
+    # y = models.IntegerField(default=0)
     
     def connect_chambers(self, destinationChamber, direction):
         destinationChamberID = destinationChamber.id
