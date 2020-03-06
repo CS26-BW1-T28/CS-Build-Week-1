@@ -118,3 +118,5 @@ def save_user_player(sender, instance, **kwargs):
     instance.player.save()
 
 
+# release: python manage.py migrate && python manage.py loaddata adventure/all_chambers.json
+
