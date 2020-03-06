@@ -47,7 +47,7 @@ class Mars:
         level_multiplier = 1
         forbidden_directions = 's'
         previous_chamber = None
-        
+
         # Each time this loop is run, another chamber is created and added to the grid
         for chamber_counter in range(len(listings)):
             chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
@@ -126,6 +126,51 @@ class Mars:
             # Store the current chamber so it can be connected to the next chamber on the next loop
             previous_chamber = chamber
 
+    def print_chambers(self):
+        str = "# " * ((3 + self.width * 5) // 2) + "\n"
+
+        reverse_grid = list(self.grid)  # make a copy of the list
+        reverse_grid.reverse()
+        for row in reverse_grid:
+            # PRINT NORTH CONNECTION ROW
+            str += "#"
+            for chamber in row:
+                if chamber is not None and chamber.n_to is not None:
+                    str += "  |  "
+                else:
+                    str += "     "
+            str += "#\n"
+            # PRINT ROOM ROW
+            str += "#"
+            for chamber in row:
+                if chamber is not None and chamber.w_to is not None:
+                    str += "-"
+                else:
+                    str += " "
+                if chamber is not None:
+                    str += f"{chamber.id}".zfill(3)
+                else:
+                    str += "   "
+                if chamber is not None and chamber.e_to is not None:
+                    str += "-"
+                else:
+                    str += " "
+            str += "#\n"
+            # PRINT SOUTH CONNECTION ROW
+            str += "#"
+            for chamber in row:
+                if chamber is not None and chamber.s_to is not None:
+                    str += "  |  "
+                else:
+                    str += "     "
+            str += "#\n"
+
+        # Add bottom border
+        str += "# " * ((3 + self.width * 5) // 2) + "\n"
+
+        # Print string
+        print(str)
+
     def jsonify(self, grid_size):
         """Method to print an ASCII map to file and all of the chambers to a JSON file"""
         # Get each chamber from the grid coordinates and write the attributes to file
@@ -151,11 +196,7 @@ class Mars:
         f.close()
     
 
-total_chambers = 500
-size_of_grid = 150
-length_of_each_level = 100
-number_of_levels = 5
-multiplier_of_the_level = 0
+
 
 chamber_listings = {
     0: ['Martian Surface', 'The ruddy rocky dusty terrain behind you. The entrance ahead of you, leading downwards.']
@@ -163,18 +204,23 @@ chamber_listings = {
 
 chamber_levels = ['Dirt', 'Concrete', 'Metal', 'Rock', 'Crystal']
 
+mars = Mars()
+total_chambers = 500
+size_of_grid = 150
+length_of_each_level = 100
+number_of_levels = 5
+multiplier_of_the_level = 0
+
+mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
+# mars.print_chambers()
+# mars.jsonify(chamber_listings)
+
+chamber_listings[total_chambers + 1] = ['Martian Lair', 'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
+
 for level in chamber_levels:
     for i in range(1, length_of_each_level + 1):
         chamber_listings[i + multiplier_of_the_level] = [f'Chamber {i + multiplier_of_the_level}: {level}', f'You are in a {level} chamber.']
     multiplier_of_the_level += length_of_each_level
-
-chamber_listings[total_chambers + 1] = ['Martian Lair', 'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
-
-mars = Mars()
-
-mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
-
-# mars.jsonify(chamber_listings)
 
 print(
     f"\nMARS\n number_of_levels:{number_of_levels},\n total_chambers: {total_chambers}\n")

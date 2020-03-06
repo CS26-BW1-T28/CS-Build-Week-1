@@ -20,7 +20,7 @@ def initialize(request):
     uuid = player.uuid
     chamber = player.chamber()
     players = chamber.playerNames(player_id)
-    chamber_names = Chamber.objects.filter(chamber=chamber.title)
+    chambers = Chamber.objects.all()
     mars_map = {
         "chamber": chamber.title,
         "chambers": [{
@@ -31,7 +31,9 @@ def initialize(request):
             's_to': i.s_to,
             'e_to': i.e_to,
             'w_to': i.w_to,
-        } for i in chamber_names]
+            'u_to': i.e_to,
+            'd_to': i.w_to,
+        } for i in chambers]
     }
 
     chambers_visited = PlayerVisited.objects.filter(player=player)
