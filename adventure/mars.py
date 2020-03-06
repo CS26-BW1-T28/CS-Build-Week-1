@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import random
-# import json
+import json
 from .fixtures import *
 import uuid
 from .models import *
@@ -125,25 +125,26 @@ class Mars:
             # Store the current chamber so it can be connected to the next chamber on the next loop
             previous_chamber = chamber
 
-    # def jsonify(self, grid_size):
-    #     """Method to print an ASCII map to file and all of the chambers to a JSON file"""
-    #     # Get each chamber from the grid coordinates and write the attributes to file
-    #     map_data = open('generated_map.txt', 'w')
-    #     json_list = []
-    #     for y in range(0, grid_size):
-    #         row_to_write = ''
-    #         for x in range(0, grid_size):
-    #             chamber = self.grid[y][x]
-    #             if chamber is not None:
-    #                 json_list.append(chamber.convert_to_dict())
-    #                 row_to_write += repr(chamber)
-    #             else:
-    #                 row_to_write += '-----'
-    #         map_data.write(row_to_write + '\n')
-    #     map_data.close()
-    #     # Save the list of dictionary-converted chambers as a .json file
-    #     with open('all_chambers.json', 'w') as f:
-    #         json.dump(json_list, f)
+    def jsonify(self, grid_size):
+        """Method to print an ASCII map to file and all of the chambers to a JSON file"""
+        # Get each chamber from the grid coordinates and write the attributes to file
+        map_data = open('generated_map.txt', 'w')
+        json_list = []
+        for y in range(0, grid_size):
+            row_to_write = ''
+            for x in range(0, grid_size):
+                chamber = self.grid[y][x]
+                if chamber is not None:
+                    json_list.append(chamber.convert_to_dict())
+                    row_to_write += repr(chamber)
+                else:
+                    row_to_write += '-----'
+            map_data.write(row_to_write + '\n')
+        map_data.close()
+        # Save the list of dictionary-converted chambers as a .json file
+        with open('all_chambers2.json', 'w') as f:
+            # json.dump(json_list, f)
+            return JsonResponse(json_list, f)
     
 
 total_chambers = 500
@@ -164,4 +165,4 @@ chamber_listings[total_chambers + 1] = ['Martian Lair',
 mars = Mars()
 mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
 #outputs to a file to be grabbed
-# mars.jsonify(size_of_grid)
+mars.jsonify(size_of_grid)

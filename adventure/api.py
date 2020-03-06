@@ -38,7 +38,7 @@ def initialize(request):
     visited_list = [i.chamber.id for i in chambers_visited]
     players = chamber.playerNames(player_id) 
 
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': room.title, 'description': room.description, 'mars_map': mars_map, 'visited': visited_list, 'players': players}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': room.title, 'description': room.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
 
 @csrf_exempt
 @api_view(['GET'])
