@@ -9,7 +9,7 @@ from .fixtures import *
 import uuid
 from .models import *
 
-# This is the room generator 
+
 class Mars:
     """Class which represents the underground labyrinthine world below the Martian environment"""
 
@@ -171,26 +171,32 @@ class Mars:
         # Print string
         print(str)
 
-    def jsonify(self, grid_size):
+    def jsonify(self):
         """Method to print an ASCII map to file and all of the chambers to a JSON file"""
         # Get each chamber from the grid coordinates and write the attributes to file
         map_data = open('generated_map.txt', 'w')
         json_list = []
-        for y in range(0, grid_size):
-            row_to_write = ''
-            for x in range(0, grid_size ):
-                chamber = self.grid[y][x]
-                if chamber is not None:
-                    json_list.append(chamber.convert_to_dict())
-                    row_to_write += repr(chamber)
-                else:
-                    row_to_write += '-----'
-            map_data.write(row_to_write + '\n')
-        map_data.close()
-        # Save the list of dictionary-converted chambers as a .json file
-        # with open('all_chambers2.json', 'w') as f:
-            # json.dump(json_list, f)
-            # return JsonResponse(json_list, f)            
+        grid_size = [item for sublist in self.grid for item in sublist]
+        
+        for i, chamber in enumerate(grid_size, start=0):
+            if chamber is None:
+                continue
+            formatted_chamber = {}
+            formatted_chamber["model"] = 'adventure.room'
+            formatted_chamber["pk"] = chamber.id
+            formatted_chamber["fields"] = {
+                "title": chamber.title,
+                "description": chamber.description,
+                "n_to": chamber.n_to,
+                "s_to": chamber.s_to,
+                "e_to": chamber.e_to,
+                "w_to": chamber.w_to,
+                "u_to": chamber.u_to,
+                "d_to": chamber.d_to,
+                "x": chamber.x,
+                "y": chamber.y,
+            }
+            json_list.append(formatted_chamber)
         f = open('all_chambers.json', "w+")
         f.write(str(json_list))
         f.close()
@@ -213,7 +219,7 @@ multiplier_of_the_level = 0
 
 mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
 # mars.print_chambers()
-# mars.jsonify(chamber_listings)
+mars.jsonify()
 
 chamber_listings[total_chambers + 1] = ['Martian Lair', 'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
 

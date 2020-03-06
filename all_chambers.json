@@ -1,1 +1,1 @@
-[{"__class__": "Chamber", "__module__": "adventure.models", "_state": 
+[{'model': 'adventure.room', 'pk': 0, 'fields': {'title': 'Martian Surface', 'description': 'The ruddy rocky dusty terrain behind you. The entrance ahead of you, leading downwards.', 'n_to': 1, 's_to': 1, 'e_to': 0, 'w_to': 0, 'u_to': 0, 'd_to': 0, 'x': 0, 'y': 0}}]
