@@ -3,37 +3,36 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
-from .models import Player, Chamber, Mars
+from .models import *
 from rest_framework.decorators import api_view
 import json
-from rest_framework import serializers, viewsets
 from django.conf import settings
+
 
 
 @csrf_exempt
 @api_view(["GET"])
 def initialize(request):
+    global chambers
     user = request.user
     player = user.player
     player_id = player.id
     uuid = player.uuid
     chamber = player.chamber()
     players = chamber.playerNames(player_id)
-    chambers = Chamber.objects.all()
-    mars_map = {
-        "chamber": chamber.title,
-        "chambers": [{
-            'id': i.id,
-            'x': i.x,
-            'y': i.y,
-            'n_to': i.n_to,
-            's_to': i.s_to,
-            'e_to': i.e_to,
-            'w_to': i.w_to,
-            'u_to': i.u_to,
-            'd_to': i.d_to,
-        } for i in chambers]
-    }
+    mars = [{
+        "title": i.title,
+        "id": i.id,
+        "description": i.description,
+        "n_to": i.n_to,
+        "s_to": i.s_to,
+        "e_to": i.e_to,
+        "w_to": i.w_to,
+        "u_to": i.u_to,
+        "d_to": i.d_to,
+        "x": i.x,
+        "y": i.y
+    } for i in Chamber.objects.all()]
 
     chambers_visited = PlayerVisited.objects.filter(player=player)
     visited_list = [i.chamber.id for i in chambers_visited]
@@ -49,32 +48,6 @@ def chambers(request):
     #     allChambers.append(chamber) 
 
     return JsonResponse(all_chambers.json, safe=False, status=200)
-
-
-@api_view(["GET"])
-def mars_map(request):
-    try:
-        chambers = Chamber.objects.all()
-        new_map = {
-            "chamber": chamber.title,
-            "chambers": [{
-                'id': i.id,
-                'x': i.x,
-                'y': i.y,
-                'n_to': i.n_to,
-                's_to': i.s_to,
-                'e_to': i.e_to,
-                'w_to': i.w_to,
-                'u_to': i.e_to,
-                'd_to': i.w_to,
-            } for i in chambers]
-        }
-        # new_map.build_chambers(5, 150, 150, ['Martian Lair', 'Deep underground, you have stumbled upon a grisly sight... (to be continued)'])
-        # new_map.jsonify()
-        
-        return JsonResponse({'MAP INFO'}, safe=False, status=201)
-    except:
-        return JsonResponse({"Failed to build map."}, safe=False, status=500)
 
 # @csrf_exempt
 @api_view(["POST"])

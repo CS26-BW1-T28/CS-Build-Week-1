@@ -51,47 +51,58 @@ class Mars:
         self.width = 0
         self.height = 0
         self.grid = None
+        self.directions = ['n', 's', 'e', 'w', 'u', 'd']
 
     def build_chambers(self, level, size_x, size_y, listings):
-        """Method which randomly generates the Martian labyrinthine underground populated with chambers"""
-        # Initialize the class attributes
+        # Initialize the grid
         self.width = size_x
         self.height = size_y
         self.grid = [None] * size_y
-        for x in range(len(self.grid)):
-            self.grid[x] = [None] * size_x
 
-        def is_chamber_present(x_axis, y_axis):
-            """Inner method for checking for the existence of a Chamber at the specified coordinates"""
-            # Prevent index out of range errors
-            if (x_axis >= size_x) or (y_axis >= size_y):
-                return True
-            if self.grid[y_axis][x_axis] is None:
-                return False
-            else:
-                return True
+        for i in range(len(self.grid)):
+            self.grid[i] = [None] * size_x
 
-        # Starting coordinates: (0,0) is the lower left
+        # Start from middle of grid (0,0)
+        x = math.ceil(len(self.grid[0]) / 2)
+        y = math.ceil(len(self.grid) / 2)
+        chamber_count = 0
+        previous_chamber = None
+        node_directions = []
+
+        # Prevent index out of range errors
+        if (x_axis >= size_x) or (y_axis >= size_y):
+            return True
+        if self.grid[y_axis][x_axis] is None:
+            return False
+        else:
+            return True
+
+        # Starting coordinates (0,0) 
         x: int = 1
         y: int = 1
+
         # The following variables are to help the random generator produce something acceptable
         chamber_direction = 'd'
         descend_level = True
         level_multiplier = 1
         forbidden_directions = 's'
         previous_chamber = None
+
         # Each time this loop is run, another chamber is created and added to the grid
         for chamber_counter in range(len(listings)):
             chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
             self.grid[y][x] = chamber
+            self.grid_ids[y][x] = chamber.id
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
                 if descend_level:
                     descend_level = False
+
             # This case is for the second chamber which is created, because there was no previous_chamber for the first one
             elif chamber_direction == 'd':
                 x += 1
                 y += 1
+
             # Randomly assign a direction to build a chamber, if it's appropriate to do so
             invalid_direction = True
             while invalid_direction and not descend_level:
@@ -111,6 +122,7 @@ class Mars:
                         if not is_chamber_present(x + test_x, y + test_y):  # Ensure no other chamber is present there
                             if chamber_direction not in forbidden_directions:  # Ensure chambers are moving in the right direction
                                 invalid_direction = False
+
             # Only execute this block when a new level is hit
             if (chamber_counter > 0) and (chamber_counter % level) == 0:
                 chamber_direction = 'd'
@@ -156,7 +168,10 @@ class Mars:
             if y >= size_y:
                 y = size_y - 1
             # Store the current chamber so it can be connected to the next chamber on the next loop
+            chamber.save()
             previous_chamber = chamber
+        self.save()
+        return chamber
 
     def jsonify(self, grid_size):
         """Method to print an ASCII map to file and all of the chambers to a JSON file"""
@@ -178,7 +193,6 @@ class Mars:
         with open('../fixtures/all_chambers.json', 'w') as f:
             json.dump(json_list, f)
 
-
 total_chambers = 500
 size_of_grid = 150
 length_of_each_level = 100
@@ -197,3 +211,6 @@ chamber_listings[total_chambers + 1] = ['Martian Lair',
 mars = Mars()
 mars.build_chambers(level=length_of_each_level, size_x=size_of_grid, size_y=size_of_grid, listings=chamber_listings)
 mars.jsonify(size_of_grid)
+
+print(
+        f"\nMARS\n levels: {number_of_levels},\n total chambers: {total_chambers}\n")
