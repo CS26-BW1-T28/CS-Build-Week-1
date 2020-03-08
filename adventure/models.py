@@ -89,7 +89,7 @@ class Player(models.Model):
             self.initialize()
             return self.chamber()
 
-    def hasVisited(self, room):
+    def hasVisited(self, chamber):
         try:
             return PlayerVisited.objects.get(player=self, chamber=chamber)
         except PlayerVisited.DoesNotExist:
