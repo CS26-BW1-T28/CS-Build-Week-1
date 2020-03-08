@@ -4,13 +4,10 @@ from chambers_attr import ChambersAttr
 
 ca = ChambersAttr()
 all_levels = ca.generator()
-# print(level_lists[0:50])
+print(level_lists[0:50])
 
 class Chamber:
-    """Class to represent each Chamber (Room) in this game"""
-
     def __init__(self, id, title, description, x, y):
-        """Default constructor for the instance attributes"""
         self.id = id
         self.title = title
         self.description = description
@@ -282,7 +279,7 @@ height = 8
 
 
 mars = Mars()
-# width, heigh, total_chambers:
+# build_chambers(width, heigh, total_chambers):
 mars.build_chambers(level=level_length, size_x=grid_size, size_y=grid_size, listings=chamber_listings)
 mars.jsonify()
 

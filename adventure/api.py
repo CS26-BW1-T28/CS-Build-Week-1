@@ -38,7 +38,7 @@ def initialize(request):
     visited_list = [i.chamber.id for i in chambers_visited]
     players = chamber.playerNames(player_id) 
 
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': room.title, 'description': room.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': chamber.title, 'description': chamber.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
 
 @csrf_exempt
 @api_view(['GET'])
@@ -83,7 +83,7 @@ def move(request):
         return JsonResponse({'name':player.user.username, 'name':nextChamber.title, 'description':nextChamber.description, 'players':players, 'error_msg':""}, safe=True)
     else:
         players = chamber.playerNames(player_id)
-        return JsonResponse({'name':player.user.username, 'chamber':chamber.name, 'description':chamber.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
+        return JsonResponse({'name':player.user.username, 'chamber':chamber.title, 'description':chamber.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
 
 @csrf_exempt
 @api_view(["POST"])
