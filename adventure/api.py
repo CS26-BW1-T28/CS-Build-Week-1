@@ -19,8 +19,7 @@ def initialize(request):
     player_id = player.id
     uuid = player.uuid
     chamber = player.chamber()
-    players = chamber.playerNames(player_id)
-    mars = [{
+    mars_map = [{
         "title": i.title,
         "id": i.id,
         "description": i.description,
@@ -43,11 +42,11 @@ def initialize(request):
 @csrf_exempt
 @api_view(['GET'])
 def chambers(request):
-    # allChambers = []
-    # for chamber in Chamber.objects.all():
-    #     allChambers.append(chamber) 
+    allChambers = []
+    for chamber in Chamber.objects.all():
+        allChambers.append(chamber) 
 
-    return JsonResponse(all_chambers.json, safe=False, status=200)
+    return JsonResponse(allChambers, safe=False, status=200)
 
 # @csrf_exempt
 @api_view(["POST"])

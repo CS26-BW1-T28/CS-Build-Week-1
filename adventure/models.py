@@ -46,7 +46,6 @@ class Chamber(models.Model):
             self.save()
 
     def convert_to_dict(self):
-        """Returns a dictionary representation of this class including metadata such as the module and class names"""
         #  Populate the dictionary with object meta data
         obj_dict = {"__class__": self.__class__.__name__, "__module__": self.__module__}
         #  Populate the dictionary with object properties
@@ -86,28 +85,21 @@ class Player(models.Model):
         try:
             return Chamber.objects.get(id=self.currentChamber)
         except Chamber.DoesNotExist:
-            self.initialize()
+            self.initialize()    
             return self.chamber()
+        print(f'Current Location: {self.currentChamber}')
 
     def hasVisited(self, chamber):
         try:
             return PlayerVisited.objects.get(player=self, chamber=chamber)
         except PlayerVisited.DoesNotExist:
             return False
-    print(Chamber)
+
 
 
 class PlayerVisited(models.Model):
-    player = models.ForeignKey(
-        'Player',
-        on_delete=models.CASCADE
-    )
-    chamber = models.ForeignKey(
-        'Chamber',
-        on_delete=models.CASCADE
-    )
-
-
+    player = models.ForeignKey('Player', on_delete=models.CASCADE)
+    chamber = models.ForeignKey('Chamber', on_delete=models.CASCADE)
 
     def jsonify(self, grid_size):
         map_data = open('generated_map.txt', 'w')
@@ -126,10 +118,8 @@ class PlayerVisited(models.Model):
         map_data.close()
 
         # Save the list of dictionary-converted chambers as a .json file
-        return JsonResponse('\all_chambers.json', safe=False, status=200)
-
-        # with open('all_chambers.json', 'w') as f:
-        #     json.dump(json_list, f)
+        with open('generated_map.json', 'w') as f:
+            json.dump(json_list, f)
 
 
 @receiver(post_save, sender=User)

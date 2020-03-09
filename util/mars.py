@@ -1,10 +1,12 @@
 import json
 import random
+import math
+import sys
 from chambers_attr import ChambersAttr
 
 ca = ChambersAttr()
-all_levels = ca.generator()
-print(level_lists[0:50])
+all_levels = ca.level_generator()
+print(all_levels[0:84:500])
 
 class Chamber:
     def __init__(self, id, title, description, x, y):
@@ -25,7 +27,6 @@ class Chamber:
         return f"<{self.id:003}>"
 
     def convert_to_dict(self):
-        """Returns a dictionary representation of this class including metadata such as the module and class names"""
         #  Populate the dictionary with object meta data
         obj_dict = {"__class__": self.__class__.__name__, "__module__": self.__module__}
         #  Populate the dictionary with object properties
@@ -66,14 +67,8 @@ class Mars:
         chamber_count = 0
         previous_chamber = None
         chamber_directions = []
-
-        # Prevent index out of range errors
-        if (x_axis >= size_x) or (y_axis >= size_y):
-            return True
-        if self.grid[y_axis][x_axis] is None:
-            return False
-        else:
-            return True
+        node = []
+        current_chamber = []
 
         # Starting coordinates (0,0) 
         x: int = 1
@@ -91,22 +86,18 @@ class Mars:
         start_point = listings[0]
         ch_title = all_levels[0]['title']
         ch_desc = all_levels[0]['desc']
-        all_levels.pop(start_point)
+        # all_levels.pop(start_point)
         chamber = Chamber(total_chambers, ch_title, ch_desc, x, y)
         # save the room
+        node.append(chamber)
         self.grid[y][x] = chamber
-        # Set previous room
         previous_chamber = chamber
-        # Increment chambers
         chamber_count += 1
-        # self.save()
-        save_chamber()
 
         # Each time this loop is run, another chamber is created and added to grid
         for chamber_count in range(len(listings)):
-            chamber = Chamber(chamber_count, listings[chamber_count][0], listings[chamber_count][1], x, y)
+            chamber = Chamber(chamber_count, listings[chamber_count]['title'], listings[chamber_count]['desc'], x, y)
             self.grid[y][x] = chamber
-            self.grid_ids[y][x] = chamber.id
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
                 if descend_level:
@@ -116,6 +107,15 @@ class Mars:
             elif chamber_direction == 'd':
                 x += 1
                 y += 1
+
+            def is_chamber_present(x_axis, y_axis):
+                # Prevent index out of range errors
+                if (x_axis >= size_x) or (y_axis >= size_y):
+                    return True
+                if self.grid[y_axis][x_axis] is None:
+                    return False
+                else:
+                    return True
 
             # Randomly assign a direction to build a chamber if possible
             invalid_direction = True
@@ -182,67 +182,66 @@ class Mars:
             if y >= size_y:
                 y = size_y - 1
             # Store the current chamber to be connected to the next chamber on the next loop
-            chamber.save()
             previous_chamber = chamber
             chamber_count += 1 
-        self.save()
-        return chamber
+            return chamber
 
-    else:
-        while total_chambers > chamber_count:
-            save_chamber()
+        else:
+            while total_chambers > chamber_count:
+                save_chamber()
 
-    def save_chamber(self):
-        node = previous_chamber
+            def save_chamber(self):
+                node = previous_chamber
 
-        if node.n_to is None:
-            print(f'Heading North.')
-            chamber_directions.push('n')
-        elif node.s_to is None:
-            print(f'Heading South.')
-            chamber_directions.push('s')
-        elif node.e_to is None:
-            print(f'Heading East.')
-            chamber_directions.push('e')
-        elif node.w_to is None:
-            print(f'Heading West.')
-            chamber_directions.push('w')
-        # elif node.d_to is None:
-        #     print(f'Decending 12 meters.')
-        #     chamber_directions.push('d')
-        # elif node.n_to is None:
-        #     print(f'Acending 12 meters.')
-        #     chamber_directions.push('u')
+                if node.n_to is None:
+                    print(f'Heading North.')
+                    chamber_directions.push('n')
+                elif node.s_to is None:
+                    print(f'Heading South.')
+                    chamber_directions.push('s')
+                elif node.e_to is None:
+                    print(f'Heading East.')
+                    chamber_directions.push('e')
+                elif node.w_to is None:
+                    print(f'Heading West.')
+                    chamber_directions.push('w')
+                # elif node.d_to is None:
+                #     print(f'Decending 12 meters.')
+                #     chamber_directions.push('d')
+                # elif node.n_to is None:
+                #     print(f'Acending 12 meters.')
+                #     chamber_directions.push('u')
 
-        totalDirections = random.randint(1, len(chamber_directions))
+                totalDirections = random.randint(1, len(chamber_directions))
 
-        for i in range(totalDirections):
-            if all_levels.title == chamber.title
-            ch_increment = all_levels[0] + 1
-            ch_title - all_levels[ch_increment]['title']
-            ch_desc = all_levels[ch_increment]['desc']
-            all_levels.pop(ch_increment)
+                for i in range(totalDirections):
+                    if all_levels.title == chamber.title:
+                        ch_increment = all_levels[0] + 1
+                        ch_title - all_levels[ch_increment]['title']
+                        ch_desc = all_levels[ch_increment]['desc']
+                        all_levels.pop(ch_increment)
 
-            if chamber_directions[i] == 'n':
-                y += 1
-            if chamber_directions[i] = 's':
-                y -= 1
-            if chamber_directions[i] == 'e':
-                x += 1
-            if chamber_directions[i] = 'e':
-                x -= 1
+                    if chamber_directions[i] == 'n':
+                        y += 1
+                    if chamber_directions[i] == 's':
+                        y -= 1
+                    if chamber_directions[i] == 'e':
+                        x += 1
+                    if chamber_directions[i] == 'e':
+                        x -= 1
+                    
+                    # Chamber(self, id, title, description, x, y)
+                    chamber = Chamber(total_chambers, rumTitle, rumDesc, x, y)
+
+                    self.grid[x][y] = chamber
+
+                    total_chambers += 1
+
             
-            # Chamber(self, id, title, description, x, y)
-            chamber = Chamber(total_chambers, rumTitle, rumDesc, x, y)
-
-            self.grid[x][y] = chamber
-
-            total_chambers += 1
-
     def jsonify(self):
         # Flatten grid of chambers
         flat_list = [item for sublist in self.grid for item in sublist]
-        json_list = []
+        formatted_fixture = []
         for i, chamber in enumerate(flat_list, start=0):
             if chamber is None:
                 continue
@@ -250,7 +249,7 @@ class Mars:
             json_chamber["model"] = 'adventure.chamber'
             json_chamber["pk"] = chamber.id
             json_chamber["fields"] = {
-                "title": chamber.name,
+                "title": chamber.title,
                 "description": chamber.description,
                 "n_to": chamber.n_to,
                 "s_to": chamber.s_to,
@@ -261,26 +260,25 @@ class Mars:
                 "x": chamber.x,
                 "y": chamber.y,
             }
-            json_list.append(json_chamber)
+            formatted_fixture.append(json_chamber)
         f = open('generated_mars.json', "w+")
-        f.write(str(json_list))
+        f.write(str(formatted_fixture))
         f.close()
 
 
-
+mars = Mars()
 total_chambers = 510
+width = 10
+height = 8
+
 grid_size = 150
 total_levels = 6
 level_multiplier = 0
 level_length = 85
-width = 10
-height = 8
 # map: 5 x 4 || chambers: 2x2 
 
-
-mars = Mars()
-# build_chambers(width, heigh, total_chambers):
-mars.build_chambers(level=level_length, size_x=grid_size, size_y=grid_size, listings=chamber_listings)
+# build_chambers(width, height, total_chambers):
+mars.build_chambers(level=level_length, size_x=grid_size, size_y=grid_size, listings=all_levels)
 mars.jsonify()
 
 print(f"\nMARS\n Levels: {total_levels},\n Total Chambers: Unknown\n")
