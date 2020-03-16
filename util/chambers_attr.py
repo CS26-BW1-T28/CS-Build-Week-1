@@ -34,7 +34,6 @@ class ChambersAttr:
             {'level': 'Rock', 'title': 'Nest', 'desc': 'Eggs, everywhere.'}
         ]
 
-
     def level_generator(self):
         total_chambers = 500
         j = 0
@@ -52,9 +51,13 @@ class ChambersAttr:
                     'title': self.chamber_desc[j]['title'], 
                     'desc': self.chamber_desc[j]['desc'],
                 }
-            
                 chamber_listings.append(new_chamber)
+
             chamber_listings.append(self.doorways[j])
             j += 1
 
         return chamber_listings
+
+ca = ChambersAttr()
+all_levels = ca.level_generator()
+# print(all_levels)

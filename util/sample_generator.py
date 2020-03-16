@@ -1,11 +1,3 @@
-# Sample Python code that can be used to generate rooms in
-# a zig-zag pattern.
-#
-# You can modify generate_rooms() to create your own
-# procedural generation algorithm and use print_rooms()
-# to see the world.
-
-
 class Room:
     def __init__(self, id, name, description, x, y):
         self.id = id
@@ -42,21 +34,24 @@ class World:
         self.height = 0
 
     def generate_rooms(self, size_x, size_y, num_rooms):
-        """Fill up the grid, bottom to top, in a zig-zag pattern"""
         # Initialize the grid
         self.grid = [None] * size_y
         self.width = size_x
         self.height = size_y
+
+        # def save_chamber(self):
+
         for i in range(len(self.grid)):
             self.grid[i] = [None] * size_x
-        # Start from lower-left corner (0,0)
-        x = -1  # (this will become 0 on the first step)
+
+        # Start grid (0,0)
+        x = -1  
         y = 0
         room_count = 0
-        # Start generating rooms to the east
-        direction = 1  # 1: east, -1: west
-        # While there are rooms to be created...
         previous_room = None
+        direction = 1 
+
+
         while room_count < num_rooms:
             # Calculate the direction of the room to be created
             if direction > 0 and x < size_x - 1:

@@ -1,1 +1,1 @@
-[{'model': 'adventure.chamber', 'pk': 0, 'fields': {'title': 'Outside', 'description': 'You step off the platform onto the red soil. The ship doors close behind you. Welcome to Mars, explorer.', 'n_to': None, 's_to': None, 'e_to': None, 'w_to': None, 'u_to': None, 'd_to': 510, 'x': 1, 'y': 1}}]
+[]

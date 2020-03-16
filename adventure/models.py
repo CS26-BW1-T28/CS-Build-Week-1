@@ -96,7 +96,6 @@ class Player(models.Model):
             return False
 
 
-
 class PlayerVisited(models.Model):
     player = models.ForeignKey('Player', on_delete=models.CASCADE)
     chamber = models.ForeignKey('Chamber', on_delete=models.CASCADE)
