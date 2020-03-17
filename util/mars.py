@@ -20,11 +20,9 @@ class Chamber:
         self.y = y
 
     def __repr__(self):
-        """Show the id of this chamber formatted with leading zeros"""
-        return f"<{self.id:003}>"
-        # if self.e_to is not None:
-        #     return f"({self.x}, {self.y}) -> ({self.e_to.x}, {self.e_to.y})"
-        # return f"({self.x}, {self.y})"
+        if self.e_to is not None:
+            return f"({self.x}, {self.y}) -> ({self.e_to.x}, {self.e_to.y})"
+        return f"({self.x}, {self.y})"
 
     def convert_to_dict(self):
         #  Populate the dictionary with object meta data
@@ -53,7 +51,7 @@ class Mars:
         self.directions = ['n', 's', 'e', 'w', 'u', 'd']
 
     
-    def build_chambers(self, level, size_x, size_y, listings, total_chambers):
+    def build_chambers(self, size_x, size_y, listings, total_chambers):
         self.width = size_x
         self.height = size_y
         self.grid = [None] * size_y
@@ -64,296 +62,97 @@ class Mars:
             self.grid[i] = [None] * size_x
 
         # Start grid point
-        x: int = 1
-        y: int = 1
+        x = -1
+        y = 0
         chamber_count = 0
         previous_chamber = None
-        chamber_directions = []
-        # x = math.ceil(len(self.grid[0]) / 2)
-        # y = math.ceil(len(self.grid) / 2)
+        direction = 1
+        j = 0
 
-        def add_chambers():
-            global previous_chamber
-            chamber = previous_chamber
-
-            if chamber.n_to is None:
-                print(f'Heading North.')
-                chamber_directions.append('n')
-            elif chamber.s_to is None:
-                print(f'Heading South.')
-                chamber_directions.append('s')
-            elif chamber.e_to is None:
-                print(f'Heading East.')
-                chamber_directions.append('e')
-            elif chamber.w_to is None:
-                print(f'Heading West.')
-
-            totalDirections = random.randint(1, len(chamber_directions))
-
-            for i in range(totalDirections):
-                for j in self.listings[0 + 1]:
-                    ch_title = self.listings[j]['title']
-                    ch_desc = self.listings[j]['desc']
-                    self.listings.pop(j)
-
-                    if chamber_directions[i] == 'n':
-                        y += 1
-                    if chamber_directions[i] == 's':
-                        y -= 1
-                    if chamber_directions[i] == 'e':
-                        x += 1
-                    if chamber_directions[i] == 'e':
-                        x -= 1
-                    
-                    # Chamber( id, title, description, x, y )
-                    chamber = Chamber(total_chambers, ch_title, ch_desc, x, y)
-
-                    self.grid[x][y] = chamber
-
-                    previous_chamber = chamber
-
-                    total_chambers += 1
-
-        # If self.grid is empty, jsonify() loop breaks and .json is empty
-        if self.grid[0] is None and self.grid[0][0] is None:
+        while chamber_count < total_chambers:
             ch_title = self.listings[j]['title']
             ch_desc = self.listings[j]['desc']
-            self.listings.pop(j)
+            # self.listings.pop(j)
 
-            chamber = Chamber(total_chambers, ch_title, ch_desc, x, y)
+            if direction > 0 and x < size_x - 1:
+                chamber_direction = "e"
+                x += 1
+            elif direction < 0 and x > 0:
+                chamber_direction = "w"
+                x -= 1
+            else:
+                # If we hit a wall, turn north and reverse direction
+                chamber_direction = "n"
+                y += 1
+                direction *= -1
+            
+            chamber = Chamber(chamber_count, ch_title, ch_desc, x, y)
+            # have to save this a diff way, too, somehow? 
 
-            self.grid[x][y] = chamber
+            # this saves room to world grid somehow?
+            self.grid[y][x] = chamber
+
+            if previous_chamber is not None:
+                previous_chamber.connect_chambers(chamber, chamber_direction)
 
             previous_chamber = chamber
-            
             total_chambers += 1
-
-            add_chambers()
-            
-            chamber = chamber 
-
-            if chamber.n_to is None:
-                print(f'Heading North.')
-                chamber_directions.append('n')
-            elif chamber.s_to is None:
-                print(f'Heading South.')
-                chamber_directions.append('s')
-            elif chamber.e_to is None:
-                print(f'Heading East.')
-                chamber_directions.append('e')
-            elif chamber.w_to is None:
-                print(f'Heading West.')
-
-            totalDirections = random.randint(1, len(chamber_directions))
-
-            for i in range(totalDirections):
-                for j in self.listings[0 + 1]:
-                    ch_title = self.listings[j]['title']
-                    ch_desc = self.listings[j]['desc']
-                    self.listings.pop(j)
-
-                    if chamber_directions[i] == 'n':
-                        y += 1
-                    if chamber_directions[i] == 's':
-                        y -= 1
-                    if chamber_directions[i] == 'e':
-                        x += 1
-                    if chamber_directions[i] == 'w':
-                        x -= 1
-                    
-                    chamber = Chamber(total_chambers, ch_title, ch_desc, x, y)
-
-                    self.grid[x][y] = chamber
-
-                    previous_chamber = chamber
-
-                    total_chambers += 1
-
-        else: 
-            while total_chambers > chamber_count:
-                add_chambers()
-
-                # def add_chambers(self):
-                #     global previous_chamber
-                #     chamber = previous_chamber
-
-                #     if chamber.n_to is None:
-                #         print(f'Heading North.')
-                #         chamber_directions.append('n')
-                #     elif chamber.s_to is None:
-                #         print(f'Heading South.')
-                #         chamber_directions.append('s')
-                #     elif chamber.e_to is None:
-                #         print(f'Heading East.')
-                #         chamber_directions.append('e')
-                #     elif chamber.w_to is None:
-                #         print(f'Heading West.')
-
-                #     totalDirections = random.randint(1, len(chamber_directions))
-
-                #     for i in range(totalDirections):
-                #         for j in self.listings[0 + 1]:
-                #             ch_title = self.listings[j]['title']
-                #             ch_desc = self.listings[j]['desc']
-                #             self.listings.pop(j)
-
-                #             if chamber_directions[i] == 'n':
-                #                 y += 1
-                #             if chamber_directions[i] == 's':
-                #                 y -= 1
-                #             if chamber_directions[i] == 'e':
-                #                 x += 1
-                #             if chamber_directions[i] == 'e':
-                #                 x -= 1
-                            
-                #             # Chamber( id, title, description, x, y )
-                #             chamber = Chamber(total_chambers, ch_title, ch_desc, x, y)
-
-                #             self.grid[x][y] = chamber
-
-                #             previous_chamber = chamber
-
-                #             total_chambers += 1
+            j += 1
 
 
+    def print_rooms(self):
+        """Print the rooms in room_grid in ascii characters"""
+        # Add top border
+        str = "# " * ((3 + self.width * 5) // 2) + "\n"
+
+        reverse_grid = list(self.grid)  # make a copy of the list
+        reverse_grid.reverse()
+        for row in reverse_grid:
+            # PRINT NORTH CONNECTION ROW
+            str += "#"
+            for room in row:
+                if room is not None and room.n_to is not None:
+                    str += "  |  "
+                else:
+                    str += "     "
+            str += "#\n"
+            # PRINT ROOM ROW
+            str += "#"
+            for room in row:
+                if room is not None and room.w_to is not None:
+                    str += "-"
+                else:
+                    str += " "
+                if room is not None:
+                    str += f"{room.id}".zfill(3)
+                else:
+                    str += "   "
+                if room is not None and room.e_to is not None:
+                    str += "-"
+                else:
+                    str += " "
+            str += "#\n"
+            # PRINT SOUTH CONNECTION ROW
+            str += "#"
+            for room in row:
+                if room is not None and room.s_to is not None:
+                    str += "  |  "
+                else:
+                    str += "     "
+            str += "#\n"
+        # Add bottom border
+        str += "# " * ((3 + self.width * 5) // 2) + "\n"
+
+        print(str)
 
 
-#NEXT LEVEL:
-#             if (chamber_count > 0) and (chamber_count % level) == 0:
-#             if self.listings[-1]:
-#                 chamber_direction = 'd'
-#                 descend_level = True
-#                 level_multiplier += 1
-#                 if level_multiplier % 5 == 0:
-#                     forbidden_directions = 'w'
-#                 elif level_multiplier % 4 == 0:
-#                     forbidden_directions = 'w'
-#                 elif level_multiplier % 3 == 0:
-#                     forbidden_directions = 's'
-#                 elif level_multiplier % 2 == 0:
-#                     forbidden_directions = 'w'
-#                 else:
-#                     forbidden_directions = 's'
-#                 if not is_chamber_present(x + 1, y + 1):
-#                     x += 1
-#                     y += 1
-#                 elif not is_chamber_present(x - 1, y + 1):
-#                     x -= 1
-#                     y += 1
-#                 elif not is_chamber_present(x + 1, y - 1):
-#                     x += 1
-#                     y -= 1
-#                 elif not is_chamber_present(x - 1, y - 1):
-#                     x -= 1
-#                     y -= 1
-#                 else:
-#                     x = size_x
-#                     y = size_y
-# #####
-#     def build_chambers2(self, level, size_x, size_y, listings):
-#         # Each time this loop runs, another chamber is created and added to grid
-#         for chamber_count in range(len(listings)):
-#             chamber = Chamber(chamber_count, listings[chamber_count]['title'], listings[chamber_count]['desc'], x, y)
-#             self.grid[y][x] = chamber
-#             if previous_chamber is not None:
-#                 previous_chamber.connect_chambers(chamber, chamber_direction)
-#                 if descend_level:
-#                     descend_level = False
-
-#             # Case is for 2nd chamber created because there's no previous_chamber for the first one
-#             elif chamber_direction == 'd':
-#                 x += 1
-#                 y += 1
-
-#             def is_chamber_present(x_axis, y_axis):
-#                 # Prevent index out of range errors
-#                 if (x_axis >= size_x) or (y_axis >= size_y):
-#                     return True
-#                 if self.grid[y_axis][x_axis] is None:
-#                     return False
-#                 else:
-#                     return True
-
-#             # Randomly assign a direction to build a chamber if possible
-#             invalid_direction = True
-#             while invalid_direction and not descend_level:
-#                 chamber_direction = ['n', 's', 'e', 'w'][random.randint(0, 3)]
-#                 test_x = 0
-#                 test_y = 0
-#                 if chamber_direction == 'n':
-#                     test_y = 1
-#                 if chamber_direction == 's':
-#                     test_y = -1
-#                 if chamber_direction == 'e':
-#                     test_x = 1
-#                 if chamber_direction == 'w':
-#                     test_x = -1
-#                 if 0 <= (y + test_y) < size_y:  # Ensure the chamber stays within the grid
-#                     if 0 <= (x + test_x) < size_x:  
-#                         if not is_chamber_present(x + test_x, y + test_y):  # Ensure no other chamber is present there
-#                             if chamber_direction not in forbidden_directions:  # Ensure chambers moving in the right direction
-#                                 invalid_direction = False
-
-#             # Only execute this block when a new level is hit
-#             if (chamber_count > 0) and (chamber_count % level) == 0:
-#                 chamber_direction = 'd'
-#                 descend_level = True
-#                 level_multiplier += 1
-#                 if level_multiplier % 5 == 0:
-#                     forbidden_directions = 'w'
-#                 elif level_multiplier % 4 == 0:
-#                     forbidden_directions = 'w'
-#                 elif level_multiplier % 3 == 0:
-#                     forbidden_directions = 's'
-#                 elif level_multiplier % 2 == 0:
-#                     forbidden_directions = 'w'
-#                 else:
-#                     forbidden_directions = 's'
-#                 if not is_chamber_present(x + 1, y + 1):
-#                     x += 1
-#                     y += 1
-#                 elif not is_chamber_present(x - 1, y + 1):
-#                     x -= 1
-#                     y += 1
-#                 elif not is_chamber_present(x + 1, y - 1):
-#                     x += 1
-#                     y -= 1
-#                 elif not is_chamber_present(x - 1, y - 1):
-#                     x -= 1
-#                     y -= 1
-#                 else:
-#                     x = size_x
-#                     y = size_y
-#             # Increment chamber placement so they're no on top of one another
-#             if chamber_direction == 'n':
-#                 y += 1
-#             elif chamber_direction == 's':
-#                 y -= 1
-#             elif chamber_direction == 'e':
-#                 x += 1
-#             elif chamber_direction == 'w':
-#                 x -= 1
-#             # Ensuring the x/y coordinates do not go out of bounds
-#             if x >= size_x:
-#                 x = size_x - 1
-#             if y >= size_y:
-#                 y = size_y - 1
-#             # Store the current chamber to be connected to the next chamber on the next loop
-#             previous_chamber = chamber
-#             chamber_count += 1 
-#             return chamber
-
-#         else:
-#             while total_chambers > chamber_count:
-#                 save_chamber()
-
-        
     def jsonify(self):
         # Flatten grid of chambers
         flat_list = [item for sublist in self.grid for item in sublist]
         formatted_fixture = []
         for i, chamber in enumerate(flat_list, start=0):
             if chamber is None: # ITS BREAKING BECAUSE OBJECT IS EMPTY, SO [] IS EMPTY
+                print('Error: no chambers!')
                 break           # MIGHT BE SELF.GRID??
             json_chamber = {}
             json_chamber["model"] = 'adventure.chamber' 
@@ -376,22 +175,18 @@ class Mars:
         f.close()
 
 
-mars = Mars()
-total_chambers = 510
+total_chambers = 120
 width = 10
 height = 8
-
-grid_size = 150
 total_levels = 6
-level_multiplier = 0
 level_length = 50
 
+mars = Mars()
 ca = ChambersAttr()
-all_levels = ca.level_generator()
+listings = ca.level_generator()
 
-# build_chambers(width, height, total_chambers, listings):
-m = mars.build_chambers(level=level_length, size_x=grid_size, size_y=grid_size, listings=all_levels, total_chambers=total_chambers)
+# (width, height, listings, total_chambers)
+m = mars.build_chambers(width, height, listings, total_chambers) 
 mars.jsonify()
 
-print(f"\nMARS\n Levels: {total_levels},\n Total Chambers: {total_chambers}\n")
-print(m)
+print(f"\nMARS\n {m}")

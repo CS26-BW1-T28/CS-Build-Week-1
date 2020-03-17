@@ -39,8 +39,6 @@ class World:
         self.width = size_x
         self.height = size_y
 
-        # def save_chamber(self):
-
         for i in range(len(self.grid)):
             self.grid[i] = [None] * size_x
 
@@ -137,4 +135,4 @@ height = 7
 w.generate_rooms(width, height, num_rooms)
 w.print_rooms()
 
-print(f"\n\nWorld\n  height: {height}\n  width: {width},\n  num_rooms: {num_rooms}\n")
+print(f"\n\nWorld\n  {w}")
