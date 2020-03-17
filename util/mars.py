@@ -57,6 +57,7 @@ class Mars:
         self.grid = [None] * size_y
         self.listings = listings
         self.total_chambers = total_chambers
+        level_length = 60
 
         for i in range(len(self.grid)):
             self.grid[i] = [None] * size_x
@@ -69,11 +70,7 @@ class Mars:
         direction = 1
         j = 0
 
-        while chamber_count < total_chambers:
-            ch_title = self.listings[j]['title']
-            ch_desc = self.listings[j]['desc']
-            # self.listings.pop(j)
-
+        while chamber_count <= total_chambers:
             if direction > 0 and x < size_x - 1:
                 chamber_direction = "e"
                 x += 1
@@ -81,23 +78,31 @@ class Mars:
                 chamber_direction = "w"
                 x -= 1
             else:
-                # If we hit a wall, turn north and reverse direction
                 chamber_direction = "n"
                 y += 1
                 direction *= -1
+
+            ch_title = self.listings[j]['title']
+            ch_desc = self.listings[j]['desc']
             
             chamber = Chamber(chamber_count, ch_title, ch_desc, x, y)
-            # have to save this a diff way, too, somehow? 
+            # print(f"Chamber {chamber_count}\n {ch_title}: {ch_desc}\n")
 
-            # this saves room to world grid somehow?
             self.grid[y][x] = chamber
+            # self.grid[y][x].save() 
 
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
 
             previous_chamber = chamber
-            total_chambers += 1
+            chamber_count += 1
             j += 1
+
+        # if chamber_count == level_length:
+            # initiate new level:
+            # build_chambers()
+        
+
 
 
     def print_rooms(self):
@@ -151,11 +156,11 @@ class Mars:
         flat_list = [item for sublist in self.grid for item in sublist]
         formatted_fixture = []
         for i, chamber in enumerate(flat_list, start=0):
-            if chamber is None: # ITS BREAKING BECAUSE OBJECT IS EMPTY, SO [] IS EMPTY
+            if chamber is None: # ITS BREAKING BECAUSE NO CHAMBERS ARE SAVED???
                 print('Error: no chambers!')
-                break           # MIGHT BE SELF.GRID??
+                break          
             json_chamber = {}
-            json_chamber["model"] = 'adventure.chamber' 
+            json_chamber["model"] = "adventure.chamber" 
             json_chamber["pk"] = chamber.id
             json_chamber["fields"] = {
                 "title": chamber.title,
@@ -170,16 +175,16 @@ class Mars:
                 "y": chamber.y,
             }
             formatted_fixture.append(json_chamber)
-        f = open('generated_mars.json', "w+")
+        f = open("generated_mars.json", "w+")
         f.write(str(formatted_fixture))
         f.close()
 
 
-total_chambers = 120
-width = 10
-height = 8
+total_chambers = 360
+width = 12
+height = 30
 total_levels = 6
-level_length = 50
+level_length = 60
 
 mars = Mars()
 ca = ChambersAttr()
