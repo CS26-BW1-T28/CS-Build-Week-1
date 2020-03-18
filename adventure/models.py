@@ -51,17 +51,17 @@ class Chamber(models.Model):
         #  Populate the dictionary with object properties
         obj_dict.update(self.__dict__)
         if self.n_to is not None:
-            obj_dict['n_to'] = self.n_to
+            obj_dict["n_to"] = self.n_to
         if self.s_to is not None:
-            obj_dict['s_to'] = self.s_to
+            obj_dict["s_to"] = self.s_to
         if self.e_to is not None:
-            obj_dict['e_to'] = self.e_to
+            obj_dict["e_to"] = self.e_to
         if self.w_to is not None:
-            obj_dict['w_to'] = self.w_to
+            obj_dict["w_to"] = self.w_to
         if self.u_to is not None:
-            obj_dict['u_to'] = self.u_to
+            obj_dict["u_to"] = self.u_to
         if self.d_to is not None:
-            obj_dict['d_to'] = self.d_to
+            obj_dict["d_to"] = self.d_to
         return obj_dict
 
     def playerNames(self, currentPlayerID):
@@ -87,7 +87,7 @@ class Player(models.Model):
         except Chamber.DoesNotExist:
             self.initialize()    
             return self.chamber()
-        print(f'Current Location: {self.currentChamber}')
+        print(f"Current Location: {self.currentChamber}")
 
     def hasVisited(self, chamber):
         try:
@@ -97,27 +97,27 @@ class Player(models.Model):
 
 
 class PlayerVisited(models.Model):
-    player = models.ForeignKey('Player', on_delete=models.CASCADE)
-    chamber = models.ForeignKey('Chamber', on_delete=models.CASCADE)
+    player = models.ForeignKey("Player", on_delete=models.CASCADE)
+    chamber = models.ForeignKey("Chamber", on_delete=models.CASCADE)
 
     def jsonify(self, grid_size):
-        map_data = open('generated_map.txt', 'w')
+        map_data = open("generated_map.txt", "w")
         json_list = []
         grid = json.loads(Mars.grid)
         for y in range(0, grid_size):
-            row_to_write = ''
+            row_to_write = ""
             for x in range(0, grid_size):
                 chamber = grid[y][x]
                 if chamber is not None:
                     json_list.append(chamber.convert_to_dict())
                     row_to_write += repr(chamber)
                 else:
-                    row_to_write += '-----'
-            map_data.write(row_to_write + '\n')
+                    row_to_write += "-----"
+            map_data.write(row_to_write + "\n")
         map_data.close()
 
         # Save the list of dictionary-converted chambers as a .json file
-        with open('generated_map.json', 'w') as f:
+        with open("generated_map.json", "w") as f:
             json.dump(json_list, f)
 
 

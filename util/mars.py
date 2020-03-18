@@ -3,54 +3,15 @@ import random
 import math
 import sys
 from chambers_attr import ChambersAttr
-
-
-class Chamber:
-    def __init__(self, id, title, description, x, y):
-        self.id = id
-        self.title = title
-        self.description = description
-        self.n_to = None
-        self.s_to = None
-        self.e_to = None
-        self.w_to = None
-        self.u_to = None
-        self.d_to = None
-        self.x = x
-        self.y = y
-
-    def __repr__(self):
-        if self.e_to is not None:
-            return f"({self.x}, {self.y}) -> ({self.e_to.x}, {self.e_to.y})"
-        return f"({self.x}, {self.y})"
-
-    def convert_to_dict(self):
-        #  Populate the dictionary with object meta data
-        obj_dict = {"__class__": self.__class__.__name__, "__module__": self.__module__}
-        #  Populate the dictionary with object properties
-        obj_dict.update(self.__dict__)
-        return obj_dict
-
-    def connect_chambers(self, connecting_chamber, direction):
-        """Connect two chambers in the given n/s/e/w/u/d direction"""
-        reverse_dirs = {"n": "s", "s": "n", "e": "w", "w": "e", "u": "d", "d": "u"}
-        reverse_dir = reverse_dirs[direction]
-        setattr(self, f"{direction}_to", connecting_chamber.id)
-        setattr(connecting_chamber, f"{reverse_dir}_to", self.id)
-
-    def get_chamber_in_direction(self, direction):
-        """Get the connecting chamber in the given n/s/e/w/u/d direction"""
-        return getattr(self, f"{direction}_to")
-
+from adventure.models import Player, Chamber
 
 class Mars:
     def __init__(self):
         self.width = 0
         self.height = 0
         self.grid = None
-        self.directions = ['n', 's', 'e', 'w', 'u', 'd']
+        self.directions = ["n", "s", "e", "w", "u", "d"]
 
-    
     def build_chambers(self, size_x, size_y, listings, total_chambers):
         self.width = size_x
         self.height = size_y
@@ -82,28 +43,31 @@ class Mars:
                 y += 1
                 direction *= -1
 
-            ch_title = self.listings[j]['title']
-            ch_desc = self.listings[j]['desc']
+            ch_title = self.listings[j]["title"]
+            ch_desc = self.listings[j]["desc"]
             
             chamber = Chamber(chamber_count, ch_title, ch_desc, x, y)
             # print(f"Chamber {chamber_count}\n {ch_title}: {ch_desc}\n")
 
             self.grid[y][x] = chamber
-            # self.grid[y][x].save() 
+            chamber.save()
 
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
 
+            if previous_chamber:
+                previous_chamber.save()
+
+            chamber.save()
             previous_chamber = chamber
             chamber_count += 1
-            j += 1
+            j += 1   
 
-        # if chamber_count == level_length:
-            # initiate new level:
-            # build_chambers()
-        
-
-
+        players=Player.objects.all()
+        for p in players:
+            p.currentChamber = chamber[0]
+            p.save()  
+            
 
     def print_rooms(self):
         """Print the rooms in room_grid in ascii characters"""
@@ -150,7 +114,6 @@ class Mars:
 
         print(str)
 
-
     def jsonify(self):
         # Flatten grid of chambers
         flat_list = [item for sublist in self.grid for item in sublist]
@@ -181,8 +144,8 @@ class Mars:
 
 
 total_chambers = 360
-width = 12
-height = 30
+width = 10
+height = 40
 total_levels = 6
 level_length = 60
 
@@ -190,7 +153,6 @@ mars = Mars()
 ca = ChambersAttr()
 listings = ca.level_generator()
 
-# (width, height, listings, total_chambers)
 m = mars.build_chambers(width, height, listings, total_chambers) 
 mars.jsonify()
 

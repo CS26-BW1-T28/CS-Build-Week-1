@@ -1,47 +1,41 @@
 from django.contrib.auth.models import User
-from adventure.models import Player, Room
+from adventure.models import Player, Chamber
+from chambers_attr import ChambersAttr
 
+Chamber.objects.all().delete()
 
-Room.objects.all().delete()
+ch_outside = Chamber(level="Martian Surface", title="Outside", desc="Seas of red hills and rocks.")
+ch_cave = Chamber(level="Dirt", title="Martian Cave", desc="Endless tunnels. Each direction ends in darkness.")
+ch_bunker = Chamber(level="Concrete", title="Bunker", desc="Seems like a military base.")
+ch_spaceship = Chamber(level="Metal", title="Space Ship", desc="Arcaic alien technology never seen before. Everything creaks.")
+ch_crystal = Chamber(level="Crystal", title="Crystal Cave", desc="The crystals glow and hum.")
+ch_hell = Chamber(level="Rock", title="Hell", desc="No walls. No. ceiling. Just a hot wind.")
 
-r_outside = Room(title="Outside Cave Entrance",
-               description="North of you, the cave mount beckons")
+ch_outside.save()
+ch_cave.save()
+ch_bunker.save()
+ch_spaceship.save()
+ch_crystal.save()
+ch_hell.save()
 
-r_foyer = Room(title="Foyer", description="""Dim light filters in from the south. Dusty
-passages run north and east.""")
+# Link levels together
+ch_outside.connect_chambers(ch_caves, "d")
+ch_caves.connect_chambers(r_outside, "u")
 
-r_overlook = Room(title="Grand Overlook", description="""A steep cliff appears before you, falling
-into the darkness. Ahead to the north, a light flickers in
-the distance, but there is no way across the chasm.""")
+ch_caves.connect_chambers(ch_bunker, "d")
+ch_bunker.connect_chambers(ch_caves, "u")
 
-r_narrow = Room(title="Narrow Passage", description="""The narrow passage bends here from west
-to north. The smell of gold permeates the air.""")
+ch_bunker.connect_chambers(ch_spaceship, "d")
+ch_spaceship.connect_chambers(ch_bunker, "u")
 
-r_treasure = Room(title="Treasure Chamber", description="""You've found the long-lost treasure
-chamber! Sadly, it has already been completely emptied by
-earlier adventurers. The only exit is to the south.""")
+ch_spaceship.connect_chambers(ch_crystal, "d")
+ch_crystal.connect_chambers(ch_spaceship, "u")
 
-r_outside.save()
-r_foyer.save()
-r_overlook.save()
-r_narrow.save()
-r_treasure.save()
-
-# Link rooms together
-r_outside.connectRooms(r_foyer, "n")
-r_foyer.connectRooms(r_outside, "s")
-
-r_foyer.connectRooms(r_overlook, "n")
-r_overlook.connectRooms(r_foyer, "s")
-
-r_foyer.connectRooms(r_narrow, "e")
-r_narrow.connectRooms(r_foyer, "w")
-
-r_narrow.connectRooms(r_treasure, "n")
-r_treasure.connectRooms(r_narrow, "s")
+ch_crystal.connect_chambers(ch_hell, "d")
+ch_hell.connect_chambers(ch_crystal, "u")
 
 players=Player.objects.all()
 for p in players:
-  p.currentRoom=r_outside.id
+  p.current_chambers.ch_outside.id
   p.save()
 

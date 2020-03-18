@@ -1,6 +1,4 @@
 import random 
-# from django.contrib.auth.models import User
-# from adventure.models import Player, Chamber
 
 class ChambersAttr:
     def __init__(self):

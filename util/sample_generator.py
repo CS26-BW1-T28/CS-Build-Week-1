@@ -34,7 +34,6 @@ class World:
         self.height = 0
 
     def generate_rooms(self, size_x, size_y, num_rooms):
-        # Initialize the grid
         self.grid = [None] * size_y
         self.width = size_x
         self.height = size_y
@@ -48,7 +47,6 @@ class World:
         room_count = 0
         previous_room = None
         direction = 1 
-
 
         while room_count < num_rooms:
             if direction > 0 and x < size_x - 1:
@@ -69,8 +67,10 @@ class World:
             if previous_room is not None:
                 previous_room.connect_rooms(room, room_direction)
 
+        
             previous_room = room
             room_count += 1
+        # return self.grid
 
     def print_rooms(self):
         """Print the rooms in room_grid in ascii characters"""

@@ -48,6 +48,10 @@ def chambers(request):
 
     return JsonResponse(allChambers, safe=False, status=200)
 
+    # with open("generated_mars2.json") as f:
+    #     data = json.load(f)
+    # return JsonResponse(data, safe=False, status=200)
+
 # @csrf_exempt
 @api_view(["POST"])
 def move(request):
