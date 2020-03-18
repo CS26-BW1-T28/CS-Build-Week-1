@@ -2,8 +2,8 @@ import json
 import random
 import math
 import sys
-from chambers_attr import ChambersAttr
-from models import Player, Chamber
+from adventure.chambers_attr import ChambersAttr
+from adventure.models import Player, Chamber
 
 class Mars:
     def __init__(self):
@@ -55,6 +55,7 @@ class Mars:
 
             self.grid[y][x] = chamber
             chamber.save()
+            self.grid[y][x].save()
 
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
@@ -63,32 +64,37 @@ class Mars:
                 previous_chamber.save()
 
             chamber.save()
+            self.grid[y][x].save()
+
             previous_chamber = chamber
             chamber_count += 1
             j += 1   
 
+        # connect rooms together
+        # for y in range(self.height):
+        #     for x in range(self.width):
+
+        #         if (x+1 < self.width) and (self.grid[y][x+1] == (self.grid[y][x] + 1)):
+        #             self.grid[y][x].connect_chambers(self.grid[y][x+1], 'e')
+        #             self.grid[y][x+1].connect_chambers(self.grid[y][x], 'w')
+
+        #         elif (x-1 >= 0) and (self.grid[y][x-1] == (self.grid[y][x] + 1)):
+        #             self.grid[y][x].connect_chambers(self.grid[y][x-1], 'w')
+        #             self.grid[y][x-1].connect_chambers(self.grid[y][x], 'e')
+
+        #         elif (y+1 < self.height) and (self.grid[y+1][x] == (self.grid[y][x] + 1)):
+        #             self.grid[y][x].connect_chambers(self.grid[y+1][x], 's')
+        #             self.grid[y+1][x].connect_chambers(self.grid[y][x], 'n')
+                    
+        #         elif (y-1 >= 0) and (self.grid[y-1][x] == (self.grid[y][x] + 1)):
+        #             self.grid[y][x].connect_chambers(self.grid[y-1][x], 'n')
+        #             self.grid[y-1][x].connect_chambers(self.grid[y][x], 's')
+
         players=Player.objects.all()
         for p in players:
-            p.currentChamber = chamber[0]
+            p.currentChamber = Chamber.objects.first().id
             p.save() 
-
-        # connect rooms together
-        for y in range(self.y):
-            for x in range(self.x):
-                if (x+1 < self.x) and (self.grid[y][x+1]) == (self.grid[y][x] + 1):
-                    self.grid[y][x].connect_chambers(self.grid[y][x+1], 'e')
-                    self.grid[y][x+1].connect_chambers(self.grid[y][x], 'w')
-                elif (x-1 >= 0) and (self.grid[y][x-1]) == (self.grid[y][x] + 1):
-                    self.grid[y][x].connect_chambers(self.grid[y][x-1], 'w')
-                    self.grid[y][x-1].connect_chambers(self.grid[y][x], 'e')
-                elif (y+1 < self.y) and (self.grid[y+1][x]) == (self.grid[y][x] + 1):
-                    self.grid[y][x].connect_chambers(self.grid[y+1][x], 's')
-                    self.grid[y+1][x].connect_chambers(self.grid[y][x], 'n')
-                elif (y-1 >= 0) and (self.grid[y-1][x]) == (self.grid[y][x] + 1):
-                    self.grid[y][x].connect_chambers(self.grid[y-1][x], 'n')
-                    self.grid[y-1][x].connect_chambers(self.grid[y][x], 's')
-
-            
+                        
 
     def print_rooms(self):
         # Add top border
