@@ -136,6 +136,13 @@ REST_FRAMEWORK = {
     ),
 }
 
+JWT_AUTH = {
+    # Authorization:Token xxx
+    'JWT_AUTH_HEADER_PREFIX': 'Token',
+}
+
+REFERRER_POLICY = 'no-referrer'
+
 CORS_ORIGIN_ALLOW_ALL=True
 
 # Internationalization
