@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 import random
@@ -16,8 +17,8 @@ class Chamber(models.Model):
     w_to = models.IntegerField(default=0)
     u_to = models.IntegerField(default=0)
     d_to = models.IntegerField(default=0)
-    # x = models.IntegerField(default=0)
-    # y = models.IntegerField(default=0)
+    x = models.IntegerField(default=0)
+    y = models.IntegerField(default=0)
     
     def connect_chambers(self, destinationChamber, direction):
         destinationChamberID = destinationChamber.id
@@ -45,23 +46,22 @@ class Chamber(models.Model):
             self.save()
 
     def convert_to_dict(self):
-        """Returns a dictionary representation of this class including metadata such as the module and class names"""
         #  Populate the dictionary with object meta data
         obj_dict = {"__class__": self.__class__.__name__, "__module__": self.__module__}
         #  Populate the dictionary with object properties
         obj_dict.update(self.__dict__)
         if self.n_to is not None:
-            obj_dict['n_to'] = self.n_to
+            obj_dict["n_to"] = self.n_to
         if self.s_to is not None:
-            obj_dict['s_to'] = self.s_to
+            obj_dict["s_to"] = self.s_to
         if self.e_to is not None:
-            obj_dict['e_to'] = self.e_to
+            obj_dict["e_to"] = self.e_to
         if self.w_to is not None:
-            obj_dict['w_to'] = self.w_to
+            obj_dict["w_to"] = self.w_to
         if self.u_to is not None:
-            obj_dict['u_to'] = self.u_to
+            obj_dict["u_to"] = self.u_to
         if self.d_to is not None:
-            obj_dict['d_to'] = self.d_to
+            obj_dict["d_to"] = self.d_to
         return obj_dict
 
     def playerNames(self, currentPlayerID):
@@ -85,10 +85,11 @@ class Player(models.Model):
         try:
             return Chamber.objects.get(id=self.currentChamber)
         except Chamber.DoesNotExist:
-            self.initialize()
+            self.initialize()    
             return self.chamber()
+        print(f"Current Location: {self.currentChamber}")
 
-    def hasVisited(self, room):
+    def hasVisited(self, chamber):
         try:
             return PlayerVisited.objects.get(player=self, chamber=chamber)
         except PlayerVisited.DoesNotExist:
@@ -96,14 +97,28 @@ class Player(models.Model):
 
 
 class PlayerVisited(models.Model):
-    player = models.ForeignKey(
-        'Player',
-        on_delete=models.CASCADE
-    )
-    chamber = models.ForeignKey(
-        'Chamber',
-        on_delete=models.CASCADE
-    )
+    player = models.ForeignKey("Player", on_delete=models.CASCADE)
+    chamber = models.ForeignKey("Chamber", on_delete=models.CASCADE)
+
+    def jsonify(self, grid_size):
+        map_data = open("generated_map.txt", "w")
+        json_list = []
+        grid = json.loads(Mars.grid)
+        for y in range(0, grid_size):
+            row_to_write = ""
+            for x in range(0, grid_size):
+                chamber = grid[y][x]
+                if chamber is not None:
+                    json_list.append(chamber.convert_to_dict())
+                    row_to_write += repr(chamber)
+                else:
+                    row_to_write += "-----"
+            map_data.write(row_to_write + "\n")
+        map_data.close()
+
+        # Save the list of dictionary-converted chambers as a .json file
+        with open("generated_map.json", "w") as f:
+            json.dump(json_list, f)
 
 
 @receiver(post_save, sender=User)

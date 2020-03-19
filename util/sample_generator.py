@@ -1,11 +1,3 @@
-# Sample Python code that can be used to generate rooms in
-# a zig-zag pattern.
-#
-# You can modify generate_rooms() to create your own
-# procedural generation algorithm and use print_rooms()
-# to see the world.
-
-
 class Room:
     def __init__(self, id, name, description, x, y):
         self.id = id
@@ -42,23 +34,21 @@ class World:
         self.height = 0
 
     def generate_rooms(self, size_x, size_y, num_rooms):
-        """Fill up the grid, bottom to top, in a zig-zag pattern"""
-        # Initialize the grid
         self.grid = [None] * size_y
         self.width = size_x
         self.height = size_y
+
         for i in range(len(self.grid)):
             self.grid[i] = [None] * size_x
-        # Start from lower-left corner (0,0)
-        x = -1  # (this will become 0 on the first step)
+
+        # Start grid (0,0)
+        x = -1  
         y = 0
         room_count = 0
-        # Start generating rooms to the east
-        direction = 1  # 1: east, -1: west
-        # While there are rooms to be created...
         previous_room = None
+        direction = 1 
+
         while room_count < num_rooms:
-            # Calculate the direction of the room to be created
             if direction > 0 and x < size_x - 1:
                 room_direction = "e"
                 x += 1
@@ -66,25 +56,21 @@ class World:
                 room_direction = "w"
                 x -= 1
             else:
-                # If we hit a wall, turn north and reverse direction
                 room_direction = "n"
                 y += 1
                 direction *= -1
-
-            # Create a room in the given direction
+                
             room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-            # Note that in Django, you'll need to save the room after you create it
 
-            # Save the room in the World grid
             self.grid[y][x] = room
 
-            # Connect the new room to the previous room
             if previous_room is not None:
                 previous_room.connect_rooms(room, room_direction)
 
-            # Update iteration variables
+        
             previous_room = room
             room_count += 1
+        # return self.grid
 
     def print_rooms(self):
         """Print the rooms in room_grid in ascii characters"""
@@ -142,4 +128,4 @@ height = 7
 w.generate_rooms(width, height, num_rooms)
 w.print_rooms()
 
-print(f"\n\nWorld\n  height: {height}\n  width: {width},\n  num_rooms: {num_rooms}\n")
+print(f"\n\nWorld\n  {w}")

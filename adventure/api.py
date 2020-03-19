@@ -4,50 +4,53 @@ from django.http import JsonResponse
 from decouple import config
 from django.contrib.auth.models import User
 from .models import *
-from .mars import *
 from rest_framework.decorators import api_view
 import json
-from rest_framework import serializers, viewsets
 from django.conf import settings
+
 
 
 @csrf_exempt
 @api_view(["GET"])
 def initialize(request):
+    global chambers
     user = request.user
     player = user.player
     player_id = player.id
     uuid = player.uuid
     chamber = player.chamber()
-    players = chamber.playerNames(player_id)
-    chamber_names = Chamber.objects.filter(chamber=chamber.title)
-    mars_map = {
-        "chamber": chamber.title,
-        "chambers": [{
-            'id': i.id,
-            'x': i.x,
-            'y': i.y,
-            'n_to': i.n_to,
-            's_to': i.s_to,
-            'e_to': i.e_to,
-            'w_to': i.w_to,
-        } for i in chamber_names]
-    }
+    mars_map = [{
+        "title": i.title,
+        "id": i.id,
+        "description": i.description,
+        "n_to": i.n_to,
+        "s_to": i.s_to,
+        "e_to": i.e_to,
+        "w_to": i.w_to,
+        "u_to": i.u_to,
+        "d_to": i.d_to,
+        "x": i.x,
+        "y": i.y
+    } for i in Chamber.objects.all()]
 
     chambers_visited = PlayerVisited.objects.filter(player=player)
     visited_list = [i.chamber.id for i in chambers_visited]
     players = chamber.playerNames(player_id) 
 
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': room.title, 'description': room.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
+    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': chamber.title, 'description': chamber.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
 
 @csrf_exempt
 @api_view(['GET'])
 def chambers(request):
     allChambers = []
     for chamber in Chamber.objects.all():
-        allChambers.append({'id':chamber.id, 'title':chamber.title, 'description':chamber.description, 'n_to': chamber.n_to, 's_to': chamber.s_to, 'e_to': chamber.e_to, 'w_to': chamber.w_to, 'u_to':chamber.u_to, 'd_to':chamber.d_to}) 
+        allChambers.append(chamber) 
 
     return JsonResponse(allChambers, safe=False, status=200)
+
+    # with open("generated_mars2.json") as f:
+    #     data = json.load(f)
+    # return JsonResponse(data, safe=False, status=200)
 
 # @csrf_exempt
 @api_view(["POST"])
@@ -83,7 +86,7 @@ def move(request):
         return JsonResponse({'name':player.user.username, 'name':nextChamber.title, 'description':nextChamber.description, 'players':players, 'error_msg':""}, safe=True)
     else:
         players = chamber.playerNames(player_id)
-        return JsonResponse({'name':player.user.username, 'chamber':chamber.name, 'description':chamber.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
+        return JsonResponse({'name':player.user.username, 'chamber':chamber.title, 'description':chamber.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
 
 @csrf_exempt
 @api_view(["POST"])

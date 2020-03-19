@@ -1,128 +1,159 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-import random
 import json
+import random
+import math
+import sys
+from chambers_attr import ChambersAttr
+from adventure.models import Player, Chamber
 
-
-class Mars2(models.Model):
+class Mars:
     def __init__(self):
         self.width = 0
         self.height = 0
         self.grid = None
+        self.directions = ["n", "s", "e", "w", "u", "d"]
 
-    def build_chambers(self, level, size_x, size_y, listings):
-        # Initialize the grid
+    def build_chambers(self, size_x, size_y, listings, total_chambers):
         self.width = size_x
         self.height = size_y
         self.grid = [None] * size_y
-        for x in range(len(self.grid)):
-            self.grid[x] = [None] * size_x
+        self.listings = listings
+        self.total_chambers = total_chambers
+        level_length = 60
 
-        def is_chamber_present(x_axis, y_axis):
-            if self.grid[y_axis][x_axis] is None:
-                return False
-            else:
-                return True
+        for i in range(len(self.grid)):
+            self.grid[i] = [None] * size_x
 
-        x: int = 1  # int(size_x / 2)
-        y: int = 1  # int(size_y / 2)
-        chamber_direction = 'd'
-        level_multiplier = 1
-        forbidden_directions = 's'
+        # Start grid point
+        x = -1
+        y = 0
+        chamber_count = 0
         previous_chamber = None
-        for chamber_counter in range(len(listings)):
-            chamber = Chamber(chamber_counter, listings[chamber_counter][0], listings[chamber_counter][1], x, y)
+        direction = 1
+        j = 0
+
+        while chamber_count <= total_chambers:
+            if direction > 0 and x < size_x - 1:
+                chamber_direction = "e"
+                x += 1
+            elif direction < 0 and x > 0:
+                chamber_direction = "w"
+                x -= 1
+            else:
+                chamber_direction = "n"
+                y += 1
+                direction *= -1
+
+            ch_title = self.listings[j]["title"]
+            ch_desc = self.listings[j]["desc"]
+            
+            chamber = Chamber(chamber_count, ch_title, ch_desc, x, y)
+            # print(f"Chamber {chamber_count}\n {ch_title}: {ch_desc}\n")
+
             self.grid[y][x] = chamber
+            chamber.save()
+
             if previous_chamber is not None:
                 previous_chamber.connect_chambers(chamber, chamber_direction)
-            invalid_direction = True
-            while invalid_direction:
-                chamber_direction = ['n', 's', 'e', 'w'][random.randint(0, 3)]
-                test_x = 0
-                test_y = 0
-                if chamber_direction == 'n':
-                    test_y = 1
-                if chamber_direction == 's':
-                    test_y = -1
-                if chamber_direction == 'e':
-                    test_x = 1
-                if chamber_direction == 'w':
-                    test_x = -1
-                if 0 <= y + test_y <= size_y:
-                    if 0 <= x + test_x <= size_x:
-                        if not is_chamber_present(x + test_x, y + test_y):
-                            if chamber_direction not in forbidden_directions:
-                                invalid_direction = False
-            if (chamber_counter > 0) and (chamber_counter % level) == 0:
-                chamber_direction = 'd'
-                level_multiplier += 1
-                if level_multiplier % 4 == 0:
-                    forbidden_directions = 'w'
-                elif level_multiplier % 3 == 0:
-                    forbidden_directions = 's'
-                elif level_multiplier % 2 == 0:
-                    forbidden_directions = 'w'
-                else:
-                    forbidden_directions = 's'
-                if not is_chamber_present(x + 1, y + 1):
-                    x += 1
-                    y += 1
-                elif not is_chamber_present(x - 1, y + 1):
-                    x -= 1
-                    y += 1
-                elif not is_chamber_present(x + 1, y - 1):
-                    x += 1
-                    y -= 1
-                elif not is_chamber_present(x - 1, y - 1):
-                    x -= 1
-                    y -= 1
-                else:
-                    x = size_x
-                    y = size_y
-            if chamber_direction == 'n':
-                y += 1
-            elif chamber_direction == 's':
-                y -= 1
-            elif chamber_direction == 'e':
-                x += 1
-            elif chamber_direction == 'w':
-                x -= 1
+
+            if previous_chamber:
+                previous_chamber.save()
+
+            chamber.save()
             previous_chamber = chamber
+            chamber_count += 1
+            j += 1   
 
+        players=Player.objects.all()
+        for p in players:
+            p.currentChamber = chamber[0]
+            p.save()  
+            
 
-    # @receiver(post_save, sender=User)
-    def create_mars_map(sender, instance, created, **kwargs):
-        total_chambers = 100
-        grid_size = 100
-        length_of_each_level = 25
-        number_of_levels = 4
-        multiplier_of_the_level = 0
-        chamber_listings = {
-            0: ['Martian Surface', 'The ruddy rocky dusty terrain behind you. The entrance ahead of you, leading downwards.']}
-        chamber_levels = ['Dirt', 'Concrete', 'Metal', 'Rock']
-        for level in chamber_levels:
-            for i in range(1, length_of_each_level + 1):
-                chamber_listings[i + multiplier_of_the_level] = [f'Chamber {i + multiplier_of_the_level}: {level}',
-                                                                f'You are in a {level} chamber.']
-            multiplier_of_the_level += length_of_each_level
-        chamber_listings[total_chambers + 1] = ['Martian Lair',
-                                                'Deep underground, you have stumbled upon a grisly sight... (to be continued)']
-        m = Mars()
-        m.build_chambers(level=length_of_each_level, size_x=grid_size, size_y=grid_size, listings=chamber_listings)
-        json_list = []
-        for i in range(0, grid_size):
-            for j in range(0, grid_size):
-                val = m.grid[i][j]
-                if val is not None:
-                    json_list.append(val.convert_to_dict())
-                    print(val, end='')
+    def print_rooms(self):
+        """Print the rooms in room_grid in ascii characters"""
+        # Add top border
+        str = "# " * ((3 + self.width * 5) // 2) + "\n"
+
+        reverse_grid = list(self.grid)  # make a copy of the list
+        reverse_grid.reverse()
+        for row in reverse_grid:
+            # PRINT NORTH CONNECTION ROW
+            str += "#"
+            for room in row:
+                if room is not None and room.n_to is not None:
+                    str += "  |  "
                 else:
-                    print('-----', end='')
-            print()
-        json_list_encoded = json.dumps(json_list, indent=4, sort_keys=True)
-        with open('./all_chambers.json', 'w') as f:
-            json.dump(json_list, f)
+                    str += "     "
+            str += "#\n"
+            # PRINT ROOM ROW
+            str += "#"
+            for room in row:
+                if room is not None and room.w_to is not None:
+                    str += "-"
+                else:
+                    str += " "
+                if room is not None:
+                    str += f"{room.id}".zfill(3)
+                else:
+                    str += "   "
+                if room is not None and room.e_to is not None:
+                    str += "-"
+                else:
+                    str += " "
+            str += "#\n"
+            # PRINT SOUTH CONNECTION ROW
+            str += "#"
+            for room in row:
+                if room is not None and room.s_to is not None:
+                    str += "  |  "
+                else:
+                    str += "     "
+            str += "#\n"
+        # Add bottom border
+        str += "# " * ((3 + self.width * 5) // 2) + "\n"
 
+        print(str)
+
+    def jsonify(self):
+        # Flatten grid of chambers
+        flat_list = [item for sublist in self.grid for item in sublist]
+        formatted_fixture = []
+        for i, chamber in enumerate(flat_list, start=0):
+            if chamber is None: # ITS BREAKING BECAUSE NO CHAMBERS ARE SAVED???
+                print('Error: no chambers!')
+                break          
+            json_chamber = {}
+            json_chamber["model"] = "adventure.chamber" 
+            json_chamber["pk"] = chamber.id
+            json_chamber["fields"] = {
+                "title": chamber.title,
+                "description": chamber.description,
+                "n_to": chamber.n_to,
+                "s_to": chamber.s_to,
+                "e_to": chamber.e_to,
+                "w_to": chamber.w_to,
+                "u_to": chamber.u_to,
+                "d_to": chamber.d_to,
+                "x": chamber.x,
+                "y": chamber.y,
+            }
+            formatted_fixture.append(json_chamber)
+        f = open("generated_mars.json", "w+")
+        f.write(str(formatted_fixture))
+        f.close()
+
+
+total_chambers = 360
+width = 10
+height = 40
+total_levels = 6
+level_length = 60
+
+mars = Mars()
+ca = ChambersAttr()
+listings = ca.level_generator()
+
+m = mars.build_chambers(width, height, listings, total_chambers) 
+mars.jsonify()
+
+print(f"\nMARS\n {m}")
