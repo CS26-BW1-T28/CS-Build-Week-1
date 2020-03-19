@@ -20,6 +20,7 @@ def initialize(request):
     uuid = player.uuid
     chamber = player.chamber()
     current_chamber=player.currentChamber
+    players = chamber.playerNames(player_id) 
     mars_map = [{
         "title": i.title,
         "id": i.id,
@@ -34,7 +35,6 @@ def initialize(request):
 
     chambers_visited = PlayerVisited.objects.filter(player=player)
     visited_list = [i.chamber.id for i in chambers_visited]
-    players = chamber.playerNames(player_id) 
 
     return JsonResponse({
         'uuid': uuid, 
@@ -50,7 +50,10 @@ def initialize(request):
 @csrf_exempt
 @api_view(['GET'])
 def chambers(request):
-    return JsonResponse({"chambers": list(Chamber.objects.values().order_by('id'))}, safe=False, status=200)
+    return JsonResponse(
+        { "chambers": list(Chamber.objects.values().order_by('id')) }, 
+        safe=False, status=200
+    )
 
 # @csrf_exempt
 @api_view(["POST"])
