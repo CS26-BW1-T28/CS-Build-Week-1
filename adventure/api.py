@@ -19,6 +19,7 @@ def initialize(request):
     player_id = player.id
     uuid = player.uuid
     chamber = player.chamber()
+    current_chamber=player.currentChamber
     mars_map = [{
         "title": i.title,
         "id": i.id,
@@ -27,8 +28,6 @@ def initialize(request):
         "s_to": i.s_to,
         "e_to": i.e_to,
         "w_to": i.w_to,
-        "u_to": i.u_to,
-        "d_to": i.d_to,
         "x": i.x,
         "y": i.y
     } for i in Chamber.objects.all()]
@@ -37,20 +36,21 @@ def initialize(request):
     visited_list = [i.chamber.id for i in chambers_visited]
     players = chamber.playerNames(player_id) 
 
-    return JsonResponse({'uuid': uuid, 'name': player.user.username, 'chamber_id': chamber.id, 'title': chamber.title, 'description': chamber.description, 'mars_map': mars_map, 'visited': visited_list}, safe=True)
+    return JsonResponse({
+        'uuid': uuid, 
+        'name': player.user.username, 
+        'current_chamber' : current_chamber,
+        'chamber_id': chamber.id, 
+        'title': chamber.title, 
+        'description': chamber.description, 
+        'mars_map': mars_map, 
+        'visited': visited_list
+    }, safe=True)
 
 @csrf_exempt
 @api_view(['GET'])
 def chambers(request):
-    allChambers = []
-    for chamber in Chamber.objects.all():
-        allChambers.append(chamber) 
-
-    return JsonResponse(allChambers, safe=False, status=200)
-
-    # with open("generated_mars2.json") as f:
-    #     data = json.load(f)
-    # return JsonResponse(data, safe=False, status=200)
+    return JsonResponse({"chambers": list(Chamber.objects.values().order_by('id'))}, safe=False, status=200)
 
 # @csrf_exempt
 @api_view(["POST"])
